@@ -1,28 +1,19 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import SideNavbarCompany from './SideNavCompnay.jsx'; // your company sidebar
- // keep your original logout
+import { Outlet } from "react-router-dom";
+import SideNavbarCompany from "./SideNavCompnay.jsx";
 
 const CompanyLayout = () => {
-
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
-      {/* Sidebar */}
+    <div className="flex min-h-screen bg-gray-100">
       <SideNavbarCompany />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Topbar */}
-        <div className="flex justify-between items-center p-4 bg-blue-300 text-white shadow border-b border-gray-200 dark:border-gray-700">
-          <h1 className="text-xl font-bold">Company Dashboard</h1>
+      <div className="flex-1 ">
+        <header className="sticky top-0 bg-blue-900 text-white p-4 font-bold">
+          Company Dashboard
+        </header>
 
-
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
+        <main className="p-4 md:p-6">
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );

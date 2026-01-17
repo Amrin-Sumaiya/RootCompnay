@@ -1,72 +1,90 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Logo from "../assets/igl.png"; // replace with your logo
+import { Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
+import Logo from "../assets/igl.png";
 
 const SideNavbar = () => {
   const location = useLocation();
-  const navigate = useNavigate(); // for programmatic navigation
-  const [isOpen, setIsOpen] = useState(true);
+  const navigate = useNavigate();
 
-  const isActive = (path) => location.pathname.includes(path);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // remove JWT
-    navigate("/login"); // redirect to login
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
-    <div className="flex">
-      {/* Toggle Button for mobile */}
+    <>
+      {/* Mobile Toggle */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-gray-800 rounded text-white shadow"
-        onClick={() => setIsOpen(!isOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-gray-900 text-white rounded-lg"
+        onClick={() => setMobileOpen(!mobileOpen)}
       >
-        {isOpen ? "✕" : "☰"}
+        {mobileOpen ? <X /> : <Menu />}
       </button>
 
+      {/* Overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div
-        className={`fixed top-0 left-0 h-full w-64 bg-gray-900 text-white shadow-md transform ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out md:translate-x-0 md:static flex flex-col`}
+      <aside
+        className={`fixed md:static z-50 top-0 left-0 h-screen bg-gray-900 text-white transition-all duration-300
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+        md:translate-x-0
+        ${collapsed ? "w-20" : "w-64"}`}
       >
-        {/* Logo */}
-        <div className="p-6 flex justify-center border-b border-gray-700">
-          <img src={Logo} alt="Logo" className="h-12 w-auto object-contain" />
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+          {!collapsed && <img src={Logo} className="h-10" />}
+          <button
+            className="hidden md:block p-2 hover:bg-gray-700 rounded"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? <ChevronRight /> : <ChevronLeft />}
+          </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2">
+        {/* Nav */}
+        <nav className="p-3 space-y-2">
           <Link
             to="/"
-            className={`block px-4 py-2 rounded hover:bg-blue-700 transition ${
-              isActive("/") && !isActive("/read") ? "bg-blue-600" : ""
-            }`}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg
+            ${isActive("/") ? "bg-blue-300" : "hover:bg-gray-700"}`}
+            onClick={() => setMobileOpen(false)}
           >
-            Dashboard
+            🏠 {!collapsed && "Dashboard"}
           </Link>
+
           <Link
             to="/read"
-            className={`block px-4 py-2 rounded hover:bg-blue-700 transition ${
-              isActive("/read") ? "bg-blue-600" : ""
-            }`}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg
+            ${isActive("/read") ? "bg-blue-300" : "hover:bg-gray-700"}`}
+            onClick={() => setMobileOpen(false)}
           >
-            Company's List
+            📋 {!collapsed && "Company List"}
           </Link>
         </nav>
 
-        {/* Logout Button */}
-        <div className="p-4 border-t border-gray-700 mt-auto">
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-700">
           <button
             onClick={handleLogout}
-            className="w-full px-4 py-2 bg-red-400 rounded hover:bg-red-700 transition text-white"
+            className="w-full bg-red-300 hover:bg-red-600 py-2 rounded-lg"
           >
-            Logout
+            🔓 {!collapsed && "Logout"}
           </button>
-          <p className="text-gray-400 text-center mt-2">© 2026</p>
         </div>
-      </div>
-    </div>
+      </aside>
+    </>
   );
 };
 

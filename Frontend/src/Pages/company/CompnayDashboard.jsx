@@ -26,14 +26,50 @@ const CompanyDashboard = () => {
     fetchDashboard();
   }, []);
 
-  if (!company) return <p>Loading...</p>;
+ if (!company) {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <p className="text-gray-500 text-lg">Loading company dashboard...</p>
+    </div>
+  );
+}
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded shadow-md">
-      <h2 className="text-2xl font-bold">{company.CompanyName} Dashboard</h2>
-      <p>URL: {company.Company_URL}</p>
-      <p>Founded d Date: {company.FoundedDate}</p>
+  <div className="w-full">
+    {/* Page Title */}
+    <div className="mb-6">
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+        {company.CompanyName}
+      </h2>
+      <p className="text-gray-500">Company Dashboard Overview</p>
     </div>
+
+    {/* Main Card */}
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Company URL */}
+        <div className="bg-green-100 rounded-xl p-4">
+          <p className="text-sm text-black mb-1">Company Website</p>
+          <a
+            href={company.Company_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="text-blue-600 font-medium hover:underline break-all"
+          >
+            {company.Company_URL}
+          </a>
+        </div>
+
+        {/* Founded Date */}
+        <div className="bg-red-100 rounded-xl p-4">
+          <p className="text-sm text-red-800 mb-1">Founded Date</p>
+          <p className="text-gray-800 font-medium">
+            {company.FoundedDate}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
   );
