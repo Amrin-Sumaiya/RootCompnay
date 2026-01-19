@@ -57,6 +57,7 @@ exports.createJob = (req, res) => {
     ],
     (err) => {
       if (err) return res.status(500).json(err);
+      
       res.status(201).json({ message: 'Job created successfully', jobLink });
     }
   );

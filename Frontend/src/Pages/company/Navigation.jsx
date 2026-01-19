@@ -1,50 +1,58 @@
 import React, { useState } from "react";
-import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const Navigation = () => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
 
-
+  const scrollToSection = (id) => {
+    navigate("/hero");
+    setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }, 150);
+    setOpen(false);
+  };
 
   return (
     <nav className="fixed w-full z-50 bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-2">
+      <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          
+
           {/* Logo */}
-          <a
-            href="#header"
+          <button
+            onClick={() => scrollToSection("hero")}
             className="text-4xl font-bold text-orange-500"
           >
             Job<span className="text-2xl text-blue-800">Portal</span>
-          </a>
+          </button>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-7 items-center">
-            <a href="#header" className="nav-link hover:text-blue-600">Home</a>
-            <a href="#features" className="nav-link hover:text-blue-600">Features</a>
-            <a href="#services" className="nav-link hover:text-blue-600">Services</a>
-<Link to="/company/all-jobs" className="nav-link hover:text-blue-600">
-  Jobs
-</Link>
+            <button onClick={() => scrollToSection("hero")}>Home</button>
+            <button onClick={() => scrollToSection("about")}>About</button>
+            <button onClick={() => scrollToSection("features")}>Features</button>
+            <button onClick={() => scrollToSection("contact")}>Contact</button>
 
+            <button
+              onClick={() => navigate("/company/all-jobs")}
+              className="hover:text-blue-600"
+            >
+              Jobs
+            </button>
 
-
-            <a href="#team" className="nav-link hover:text-blue-600">Team</a>
-            <a href="#testimonials" className="nav-link hover:text-blue-600">Testimonials</a>
-            <a href="#contact" className="nav-link hover:text-blue-600">Contact</a>
-
-            <a
-              href="#login"
-              className="px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-600 transition"
+            <button
+              onClick={() => navigate("/login")}
+              className="px-4 py-2 text-gray-900 hover:text-blue-600 "
             >
               Login
-            </a>
+            </button>
           </div>
 
-          {/* Mobile Button */}
+          {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-gray-700 text-2xl"
+            className="md:hidden text-2xl"
             onClick={() => setOpen(!open)}
           >
             ☰
@@ -56,21 +64,21 @@ const Navigation = () => {
       {open && (
         <div className="md:hidden bg-white shadow-lg">
           <div className="flex flex-col px-6 py-4 space-y-4">
-            <a href="#header" onClick={() => setOpen(false)}>Home</a>
-            <a href="#features" onClick={() => setOpen(false)}>Features</a>
-            <a href="#services" onClick={() => setOpen(false)}>Services</a>
-            <a href="#jobs" onClick={() => setOpen(false)}>Jobs</a>
-            <a href="#team" onClick={() => setOpen(false)}>Team</a>
-            <a href="#testimonials" onClick={() => setOpen(false)}>Testimonials</a>
-            <a href="#contact" onClick={() => setOpen(false)}>Contact</a>
+            <button onClick={() => scrollToSection("hero")}>Home</button>
+            <button onClick={() => scrollToSection("about")}>About</button>
+            <button onClick={() => scrollToSection("features")}>Features</button>
+            <button onClick={() => scrollToSection("contact")}>Contact</button>
 
-            <a
-              href="#login"
-              onClick={() => setOpen(false)}
-              className="text-center px-4 py-2 bg-blue-600 text-white rounded-lg"
+            <button onClick={() => navigate("/company/all-jobs")}>
+              Jobs
+            </button>
+
+            <button
+              onClick={() => navigate("/login")}
+              className="text-blue-600 hover:text-white  rounded-full"
             >
               Login
-            </a>
+            </button>
           </div>
         </div>
       )}

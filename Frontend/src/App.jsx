@@ -1,58 +1,65 @@
-import React from 'react';
-import AuthGuard from './auth/AuthGuard.jsx';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import AdminLayout from './Pages/AdminLayout.jsx';
-import Create from './Pages/Create.jsx';
-import Read from './Pages/Read.jsx';
-import Dashboard from './Pages/Dashboard.jsx';
-import RootLogin from './Pages/RootLogin.jsx';
-import Home from './Componenets/Home.jsx';
-import CompanyLayout from './Pages/company/CompnayLayout.jsx';
-import CompanyDashboard from './Pages/company/CompnayDashboard.jsx';
-import CompnayJobs from './Pages/company/CompnayJobs.jsx';
-import CreateJob from './Pages/company/CreateJob.jsx';
-import AllJobs from './Pages/company/AllJobs.jsx';
-// import CompanyLogin from './Pages/company/CompanyLogin.jsx';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AuthGuard from "./auth/AuthGuard.jsx";
+
+// Public Pages
+import PublicLayout from "./layouts/PublicLayout.jsx";
+import Home from "./Componenets/Hero.jsx";
+import RootLogin from "./Pages/RootLogin.jsx";
+import AllJobs from "./Pages/company/AllJobs.jsx";
+
+// Root Dashboard Pages
+import AdminLayout from "./Pages/AdminLayout.jsx";
+import Dashboard from "./Pages/Dashboard.jsx";
+import Create from "./Pages/Create.jsx";
+import Read from "./Pages/Read.jsx";
+
+// Company Dashboard Pages
+import CompanyLayout from "./Pages/company/CompnayLayout.jsx";
+import CompanyDashboard from "./Pages/company/CompnayDashboard.jsx";
+import CompnayJobs from "./Pages/company/CompnayJobs.jsx";
+import CreateJob from "./Pages/company/CreateJob.jsx";
 
 const App = () => {
   return (
     <Router>
-<Routes>
-  <Route path="/home" element={<Home />} />
-  <Route path="/login" element={<RootLogin />} />
+      <Routes>
+        {/* ================= PUBLIC ROUTES ================= */}
+        <Route element={<PublicLayout />}>
+         
+          <Route path="/hero" element={<Home />} />
+          <Route path="/login" element={<RootLogin />} />
+          <Route path="/company/all-jobs" element={<AllJobs />} />
+        </Route>
 
-  {/* Public route for AllJobs */}
-  <Route path="/company/all-jobs" element={<AllJobs />} />
+        {/* ================= ROOT DASHBOARD (Protected) ================= */}
+        <Route
+          path="/*"
+          element={
+            <AuthGuard role="root">
+              <AdminLayout />
+            </AuthGuard>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="create" element={<Create />} />
+          <Route path="read" element={<Read />} />
+        </Route>
 
-  {/* Root dashboard - protected */}
-  <Route
-    path="/*"
-    element={
-      <AuthGuard role="root">
-        <AdminLayout />
-      </AuthGuard>
-    }
-  >
-    <Route index element={<Dashboard />} />
-    <Route path="create" element={<Create />} />
-    <Route path="read" element={<Read />} />
-  </Route>
-
-  {/* Company dashboard - protected */}
-  <Route
-    path="/company/:companyUrl/*"
-    element={
-      <AuthGuard role="company">
-        <CompanyLayout />
-      </AuthGuard>
-    }
-  >
-    <Route path="dashboard" element={<CompanyDashboard />} />
-    <Route path="jobs" element={<CompnayJobs />} />
-    <Route path="jobs/create" element={<CreateJob />} />
-  </Route>
-</Routes>
-
+        {/* ================= COMPANY DASHBOARD (Protected) ================= */}
+        <Route
+          path="/company/:companyUrl/*"
+          element={
+            <AuthGuard role="company">
+              <CompanyLayout />
+            </AuthGuard>
+          }
+        >
+          <Route path="dashboard" element={<CompanyDashboard />} />
+          <Route path="jobs" element={<CompnayJobs />} />
+          <Route path="jobs/create" element={<CreateJob />} />
+        </Route>
+      </Routes>
     </Router>
   );
 };
