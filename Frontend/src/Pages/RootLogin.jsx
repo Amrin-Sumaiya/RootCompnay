@@ -22,18 +22,20 @@ const RootLogin = () => {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.role);
 
-      if (res.data.role === "root") {
-        navigate("/"); // root dashboard
-      } else if (res.data.role === "company") {
-        navigate(`/company/${res.data.company.Company_URL}/dashboard`);
-      }
+if (res.data.role === "root") {
+  navigate("/"); // root dashboard
+} else if (res.data.role === "company") {
+  localStorage.setItem("companyName", res.data.company.CompanyName);
+  navigate(`/company/${res.data.company.Company_URL}/dashboard`);
+}
+
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-blue-100 p-4">
       <form
         onSubmit={handleLogin}
         className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md border border-gray-200"

@@ -85,3 +85,26 @@ exports.applyForJob = (req, res) => {
   );
 };
 
+
+//get candidates for a specific job (Copnay Veiw)
+exports.getCandidatesForJob = (req, res) => {
+  const { jobId } = req.params;
+  // const { companyName } = req.query; // fixed typo
+
+  const sql = `
+      SELECT id, first_name, last_name, email, phone, about, cv
+      FROM job_applications
+      WHERE job_id = ? 
+  `;
+  
+  db.query(sql, [jobId], (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ message: 'Database Error' }); // fixed typo
+    }
+
+    res.status(200).json(result); // fixed typo
+  });
+};
+
+

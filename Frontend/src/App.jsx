@@ -19,6 +19,7 @@ import CompanyLayout from "./Pages/company/CompnayLayout.jsx";
 import CompanyDashboard from "./Pages/company/CompnayDashboard.jsx";
 import CompnayJobs from "./Pages/company/CompnayJobs.jsx";
 import CreateJob from "./Pages/company/CreateJob.jsx";
+import JobCandidates from "./Pages/company/JobCandidates.jsx";
 
 const App = () => {
   return (
@@ -58,6 +59,8 @@ const App = () => {
           <Route path="dashboard" element={<CompanyDashboard />} />
           <Route path="jobs" element={<CompnayJobs />} />
           <Route path="jobs/create" element={<CreateJob />} />
+          <Route path="jobs/:jobId/candidates" element={<JobCandidates />} />
+
         </Route>
       </Routes>
     </Router>

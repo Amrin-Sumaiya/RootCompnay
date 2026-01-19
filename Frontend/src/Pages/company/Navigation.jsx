@@ -1,87 +1,169 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+/* eslint-disable react-hooks/static-components */
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Navigation = () => {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Add shadow on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const scrollToSection = (id) => {
-    navigate("/hero");
+    if (location.pathname !== "/hero" && location.pathname !== "/") {
+       navigate("/hero");
+    }
+    
     setTimeout(() => {
-      document.getElementById(id)?.scrollIntoView({
-        behavior: "smooth",
-      });
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
     }, 150);
     setOpen(false);
   };
 
-  return (
-    <nav className="fixed w-full z-50 bg-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
+  // Reusable Nav Link Component for Desktop
+  const NavLink = ({ label, target }) => (
+    <button
+      onClick={() => scrollToSection(target)}
+      className="text-gray-600 hover:text-blue-600 font-medium transition-colors duration-200 text-sm lg:text-base relative group"
+    >
+      {label}
+      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full duration-300"></span>
+    </button>
+  );
 
-          {/* Logo */}
+  return (
+    <nav
+      className={`fixed w-full z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-white/90 backdrop-blur-md shadow-md py-2"
+          : "bg-white py-4"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-12">
+          
+          {/* Logo area */}
           <button
             onClick={() => scrollToSection("hero")}
-            className="text-4xl font-bold text-orange-500"
+            className="flex items-center gap-1 group"
           >
-            Job<span className="text-2xl text-blue-800">Portal</span>
+            <div className="text-2xl md:text-3xl font-extrabold tracking-tighter text-gray-900 group-hover:opacity-80 transition-opacity">
+              <span className="text-orange-500">Job</span>
+              <span className="text-blue-700">Portal</span>
+            </div>
           </button>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-7 items-center">
-            <button onClick={() => scrollToSection("hero")}>Home</button>
-            <button onClick={() => scrollToSection("about")}>About</button>
-            <button onClick={() => scrollToSection("features")}>Features</button>
-            <button onClick={() => scrollToSection("contact")}>Contact</button>
+          <div className="hidden md:flex space-x-8 items-center">
+            <NavLink label="Home" target="hero" />
+            <NavLink label="About" target="about" />
+            <NavLink label="Features" target="features" />
+            <NavLink label="Contact" target="contact" />
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-gray-300 mx-2"></div>
 
             <button
               onClick={() => navigate("/company/all-jobs")}
-              className="hover:text-blue-600"
+              className="text-gray-700 font-semibold hover:text-blue-600 transition-colors flex items-center gap-1"
             >
-              Jobs
+              Browse Jobs
             </button>
 
             <button
               onClick={() => navigate("/login")}
-              className="px-4 py-2 text-gray-900 hover:text-blue-600 "
+              className="bg-blue-600 text-white px-6 py-2.5 rounded-full font-medium shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:shadow-blue-600/40 transform hover:-translate-y-0.5 transition-all duration-200"
             >
               Login
             </button>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-2xl"
-            onClick={() => setOpen(!open)}
-          >
-            ☰
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {open && (
-        <div className="md:hidden bg-white shadow-lg">
-          <div className="flex flex-col px-6 py-4 space-y-4">
-            <button onClick={() => scrollToSection("hero")}>Home</button>
-            <button onClick={() => scrollToSection("about")}>About</button>
-            <button onClick={() => scrollToSection("features")}>Features</button>
-            <button onClick={() => scrollToSection("contact")}>Contact</button>
-
-            <button onClick={() => navigate("/company/all-jobs")}>
-              Jobs
-            </button>
-
+          <div className="md:hidden flex items-center">
             <button
-              onClick={() => navigate("/login")}
-              className="text-blue-600 hover:text-white  rounded-full"
+              onClick={() => setOpen(!open)}
+              className="text-gray-600 hover:text-blue-600 focus:outline-none p-2"
             >
-              Login
+              {open ? (
+                // X Icon
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                // Hamburger Icon
+                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      <div
+        className={`md:hidden absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl transition-all duration-300 ease-in-out origin-top ${
+          open ? "opacity-100 scale-y-100 visible" : "opacity-0 scale-y-0 invisible"
+        }`}
+      >
+        <div className="flex flex-col px-6 py-6 space-y-4">
+          <button 
+            onClick={() => scrollToSection("hero")} 
+            className="text-left text-lg font-medium text-gray-700 hover:text-blue-600"
+          >
+            Home
+          </button>
+          <button 
+            onClick={() => scrollToSection("about")}
+            className="text-left text-lg font-medium text-gray-700 hover:text-blue-600"
+          >
+            About
+          </button>
+          <button 
+            onClick={() => scrollToSection("features")}
+            className="text-left text-lg font-medium text-gray-700 hover:text-blue-600"
+          >
+            Features
+          </button>
+          <button 
+            onClick={() => scrollToSection("contact")}
+            className="text-left text-lg font-medium text-gray-700 hover:text-blue-600"
+          >
+            Contact
+          </button>
+
+          <hr className="border-gray-100 my-2" />
+
+          <button 
+            onClick={() => { navigate("/company/all-jobs"); setOpen(false); }}
+            className="text-left text-lg font-bold text-blue-800 flex items-center gap-2"
+          >
+            Find a Job 
+            <span>→</span>
+          </button>
+
+          <button
+            onClick={() => { navigate("/login"); setOpen(false); }}
+            className="w-full bg-blue-600 text-white text-center py-3 rounded-lg font-bold shadow-md active:scale-95 transition-transform"
+          >
+            Login / Sign Up
+          </button>
+        </div>
+      </div>
     </nav>
   );
 };

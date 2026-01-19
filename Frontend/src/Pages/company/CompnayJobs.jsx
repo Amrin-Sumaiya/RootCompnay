@@ -63,6 +63,7 @@ const CompnayJobs = () => {
     }
     return result;
   };
+ 
 
   return (
     <div className="p-6 flex flex-col items-center">
@@ -87,7 +88,8 @@ const CompnayJobs = () => {
               <th className="border p-2">Location</th>
               <th className="border p-2">Salary</th>
               <th className="border p-2">Type</th>
-              <th className="border p-2">View</th>
+              <th className="border p-2">View Detais</th>
+              <th className='border p-2'>Candidates List</th>
               <th className="border p-2">Update</th>
               <th className="border p-2">Delete</th>
             </tr>
@@ -118,6 +120,25 @@ const CompnayJobs = () => {
                       <FaEye size={18} />
                     </button>
                   </td>
+
+<td className="border p-2 capitalize"> 
+  <button
+    className="text-gray-600 hover:text-gray-900"
+    title="Candidates list"
+   onClick={() =>
+  navigate(
+    `/company/${companyUrl}/jobs/${job.JobID}/candidates`,
+    {
+      state: { jobTitle: job.JobTitle }
+    }
+  )
+}
+
+  >
+    <FaEye size={18} />
+  </button>
+</td>
+
                   <td className="border p-2">
                     <button
                       onClick={() => navigate(`/company/${companyUrl}/jobs/edit/${job.JobID}`)}
