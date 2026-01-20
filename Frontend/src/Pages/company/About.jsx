@@ -34,7 +34,7 @@ const About = () => {
               <p className="text-lg font-semibold">10K+ Jobs Posted</p>
             </div>
           </div>
-
+             
           {/* Content */}
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800">

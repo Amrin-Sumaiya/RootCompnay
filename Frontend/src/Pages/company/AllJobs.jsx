@@ -20,7 +20,7 @@ const AllJobs = () => {
   const [jobs, setJobs] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
-  
+   
   // New State for Search
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -32,6 +32,13 @@ const AllJobs = () => {
     phone: "",
     about: "",
     cv: null,
+  });
+
+  // Validation Error State
+  const [errors, setErrors] = useState({
+    phone: "",
+    about: "",
+    cv: ""
   });
 
   useEffect(() => {
@@ -58,13 +65,71 @@ const AllJobs = () => {
     );
   });
 
-  // Handle form input changes
+  // --- STRICT VALIDATION HANDLER ---
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (files) {
-      setFormData({ ...formData, [name]: files[0] });
-    } else {
-      setFormData({ ...formData, [name]: value });
+    let newErrors = { ...errors };
+    let shouldUpdateState = true;
+
+    // 1. Phone Validation (Hard Stop > 11 digits)
+    if (name === "phone") {
+        const cleanNumber = value.replace(/\D/g, ''); // Count digits only
+        
+        if (cleanNumber.length > 11) {
+            // STOP TYPING if trying to exceed 11
+            shouldUpdateState = false; 
+            newErrors.phone = "Invalid number (Max 11 digits)";
+        } else {
+            // Allow typing, but show error if not exactly 11 yet (optional, or check on submit)
+            // Here we clear error if it is valid length, otherwise we can leave it empty until submit
+            if (cleanNumber.length > 0 && cleanNumber.length < 11) {
+                 // You can show "Invalid number" while typing if you want, 
+                 // or just wait for submit. User asked for "Invalid number" under field.
+                 newErrors.phone = "Invalid number"; 
+            } else {
+                 newErrors.phone = "";
+            }
+        }
+    }
+
+    // 2. About Validation (Hard Stop > 120 words)
+    if (name === "about") {
+        const wordCount = value.trim().split(/\s+/).filter(Boolean).length;
+        const currentWordCount = formData.about.trim().split(/\s+/).filter(Boolean).length;
+
+        // If trying to add more words beyond 120
+        if (wordCount > 120 && wordCount > currentWordCount) {
+             shouldUpdateState = false; // STOP TYPING
+             newErrors.about = "Cross word limitation";
+        } else {
+             if (wordCount > 120) {
+                 newErrors.about = "Cross word limitation";
+             } else {
+                 newErrors.about = "";
+             }
+        }
+    }
+
+    // 3. CV Validation (PDF Only)
+    if (name === "cv" && files) {
+        if (files[0] && files[0].type !== "application/pdf") {
+            newErrors.cv = "Only pdf file accepted";
+            e.target.value = null; // Reset input
+            shouldUpdateState = false; // Don't store invalid file
+        } else {
+            newErrors.cv = "";
+        }
+    }
+
+    setErrors(newErrors);
+
+    // Only update form data if strict checks pass
+    if (shouldUpdateState) {
+        if (files) {
+            setFormData({ ...formData, [name]: files[0] });
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
     }
   };
 
@@ -72,6 +137,17 @@ const AllJobs = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedJob) return;
+
+    // Final Validation Check
+    if (formData.phone.replace(/\D/g, '').length !== 11) {
+        setErrors(prev => ({...prev, phone: "Invalid number"}));
+        alert("Phone number must be exactly 11 digits");
+        return;
+    }
+    if (errors.cv || errors.about) {
+        alert("Please fix the errors before submitting.");
+        return;
+    }
 
     try {
       const data = new FormData();
@@ -102,6 +178,7 @@ const AllJobs = () => {
         about: "",
         cv: null,
       });
+      setErrors({ phone: "", about: "", cv: "" });
     } catch (err) {
       console.error(err);
       if (err.response) {
@@ -114,10 +191,9 @@ const AllJobs = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      
+       
       {/* --- 1. Background Banner --- */}
-      <div className="bg-gradient-to-r from-slate-900 to-blue-900 py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Decorative circle */}
+      <div className="bg-linear-to-r from-slate-900 to-blue-900 py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-blue-500 opacity-10 blur-3xl"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-indigo-500 opacity-10 blur-3xl"></div>
 
@@ -131,7 +207,7 @@ const AllJobs = () => {
         </div>
       </div>
 
-      {/* --- 2. Search Bar Section (Floating overlap) --- */}
+      {/* --- 2. Search Bar Section --- */}
       <div className="max-w-4xl mx-auto px-4 relative z-20 -mt-8">
         <div className="bg-white rounded-xl shadow-lg p-3 flex items-center border border-gray-100">
           <div className="pl-3">
@@ -205,9 +281,9 @@ const AllJobs = () => {
                       {job.SalaryFrom} - {job.SalaryTo} <span className="text-xs ml-1 uppercase font-semibold">{job.Currency}</span>
                     </p>
                     {job.Address && (
-                       <p className="text-xs text-gray-400 mt-2 truncate">
-                          {job.Address}
-                       </p>
+                        <p className="text-xs text-gray-400 mt-2 truncate">
+                           {job.Address}
+                        </p>
                     )}
                   </div>
 
@@ -240,13 +316,13 @@ const AllJobs = () => {
               className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" 
               onClick={() => setShowModal(false)}
           ></div>
-          
+           
           <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all flex flex-col max-h-[90vh]">
             {/* Modal Header */}
-            <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between text-center  ">
               <div>
-                  <h2 className="text-lg font-bold text-gray-900">Application Form</h2>
-                  <p className="text-sm text-blue-600 font-medium truncate max-w-[200px] sm:max-w-xs">{selectedJob.JobTitle}</p>
+                  <h2 className="text-lg font-bold text-gray-900 ">Application Form</h2>
+                  <p className="text-2xl text-blue-600 font-medium ">{selectedJob.JobTitle}</p>
               </div>
               <button
                 onClick={() => setShowModal(false)}
@@ -296,37 +372,76 @@ const AllJobs = () => {
                   />
                 </div>
 
+                {/* --- PHONE FIELD (Strict BD 11 Digits) --- */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                    required
-                  />
+                  <div className="relative">
+                    {/* BD Flag & +880 */}
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <img 
+                        src="https://flagcdn.com/w20/bd.png" 
+                        srcSet="https://flagcdn.com/w40/bd.png 2x" 
+                        width="20" 
+                        alt="Bangladesh Flag" 
+                      />
+                      <span className="text-gray-500 pl-1 text-sm">+88</span>
+                    </div>
+                    
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="1XXXXXXXXX"
+                      className={`w-full pl-20 px-4 py-2 border rounded-lg focus:ring-2 outline-none transition-all ${
+                        errors.phone 
+                          ? "border-red-500 focus:ring-red-500 focus:border-red-500" 
+                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      }`}
+                      required
+                    />
+                  </div>
+                  {/* Error Message */}
+                  {errors.phone && (
+                    <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                  )}
                 </div>
 
+                {/* --- ABOUT FIELD (Strict 120 Words) --- */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">About Yourself</label>
+                  <div className="flex justify-between">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">About Yourself</label>
+                    <span className={`text-xs ${formData.about.trim().split(/\s+/).filter(Boolean).length >= 150 ? 'text-red-500' : 'text-gray-600'}`}>
+                       {formData.about.trim().split(/\s+/).filter(Boolean).length}/150 words
+                    </span>
+                  </div>
                   <textarea
                     name="about"
                     value={formData.about}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all h-24 resize-none"
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 outline-none transition-all h-24 resize-none ${
+                        errors.about 
+                          ? "border-red-500 focus:ring-red-500 focus:border-red-500" 
+                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      }`}
                     required
                   ></textarea>
+                  {/* Error Message */}
+                  {errors.about && (
+                    <p className="text-red-500 text-xs mt-1">{errors.about}</p>
+                  )}
                 </div>
 
+                {/* --- CV FIELD (Strict PDF) --- */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Upload CV / Resume</label>
                   <input
                     type="file"
                     name="cv"
+                    accept=".pdf"
                     onChange={handleChange}
                     className="block w-full text-sm text-slate-500
-                      file:mr-4 file:py-2.5 file:px-4
+                      file:mr-65 file:py-2.5 file:px-4
                       file:rounded-lg file:border-0
                       file:text-sm file:font-semibold
                       file:bg-blue-50 file:text-blue-700
@@ -334,6 +449,13 @@ const AllJobs = () => {
                       border border-gray-200 rounded-lg"
                     required
                   />
+                  {/* Static Instruction Text */}
+                  <p className="text-green-800 text-xs font-semibold mt-1">Only pdf file accepted</p>
+                  
+                  {/* Error Message */}
+                  {errors.cv && (
+                     <p className="text-red-500 text-xs mt-1">{errors.cv}</p>
+                  )}
                 </div>
 
                 <div className="pt-2">
