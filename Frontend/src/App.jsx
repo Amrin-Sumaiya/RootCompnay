@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AuthGuard from "./auth/AuthGuard.jsx";
+import JobDetails from "./Pages/company/JobDetails.jsx";
 
 // Public Pages
 import PublicLayout from "./layouts/PublicLayout.jsx";
@@ -20,6 +21,10 @@ import CompanyDashboard from "./Pages/company/CompnayDashboard.jsx";
 import CompnayJobs from "./Pages/company/CompnayJobs.jsx";
 import CreateJob from "./Pages/company/CreateJob.jsx";
 import JobCandidates from "./Pages/company/JobCandidates.jsx";
+import UpdateJobPost from "./Pages/company/UpdateJobPost.jsx";
+
+
+
 
 const App = () => {
   return (
@@ -31,6 +36,8 @@ const App = () => {
           <Route path="/hero" element={<Home />} />
           <Route path="/login" element={<RootLogin />} />
           <Route path="/company/all-jobs" element={<AllJobs />} />
+          <Route path="/jobs/:companyUrl/:jobSlug" element={<JobDetails />} />
+
         </Route>
 
         {/* ================= ROOT DASHBOARD (Protected) ================= */}
@@ -59,6 +66,7 @@ const App = () => {
           <Route path="dashboard" element={<CompanyDashboard />} />
           <Route path="jobs" element={<CompnayJobs />} />
           <Route path="jobs/create" element={<CreateJob />} />
+         <Route path="jobs/edit/:id" element={<UpdateJobPost />} />
           <Route path="jobs/:jobId/candidates" element={<JobCandidates />} />
 
         </Route>

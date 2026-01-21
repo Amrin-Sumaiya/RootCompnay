@@ -33,9 +33,6 @@ app.use('/api/company', jobRoutes);
 app.use('/api/job', jobApplicationRoutes)
 
 
-
-
-
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

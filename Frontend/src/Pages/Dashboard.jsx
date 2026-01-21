@@ -107,7 +107,7 @@ const Dashboard = () => {
             <button className="text-sm text-indigo-600 font-medium hover:underline">View Report</button>
           </div>
           
-          <div className="h-[350px] w-full">
+          <div className="h-87.5 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 {/* FIX: Use standard lowercase SVG tags for gradients. 

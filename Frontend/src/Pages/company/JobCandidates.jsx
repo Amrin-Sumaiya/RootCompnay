@@ -72,7 +72,7 @@ const JobCandidates = () => {
         <div className="relative group cursor-help">
              <div className="flex items-center gap-2 text-gray-600">
                 <FaInfoCircle className="text-gray-400"/>
-                <span className="truncate max-w-[200px] block">{info.getValue()}</span>
+                <span className="truncate max-w-50 block">{info.getValue()}</span>
              </div>
              {/* Simple Tooltip approach for long text */}
              <div className="absolute hidden group-hover:block z-10 bg-black text-white text-xs p-2 rounded w-64 -mt-10 shadow-lg">
@@ -115,7 +115,7 @@ const JobCandidates = () => {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8 text-center">
           <h2 className="text-gray-500 font-medium text-sm uppercase tracking-wider mb-2">Applicant Overview</h2>
           <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900">
-            Candidates for <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">{jobTitle || `Job #${jobId}`}</span>
+            Candidates for <span className="text-transparent bg-clip-text bg-linear-to-r from-purple-600 to-blue-600">{jobTitle || `Job #${jobId}`}</span>
           </h1>
           <div className="mt-4 inline-flex items-center bg-purple-50 px-4 py-1 rounded-full border border-purple-100">
              <span className="text-purple-700 font-bold text-sm">{candidates.length} Applicants found</span>

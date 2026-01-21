@@ -9,7 +9,8 @@ import {
   FaMapMarkerAlt, 
   FaMoneyBillWave, 
   FaBriefcase,
-  FaTimes
+  FaTimes,
+  FaCheckCircle
 } from 'react-icons/fa';
 import { 
   useReactTable, 
@@ -33,7 +34,7 @@ const CompanyJobs = () => {
 
   useEffect(() => {
     fetchJobs();
-    // eslint-disable-next-line
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchJobs = async () => {
@@ -53,7 +54,6 @@ const CompanyJobs = () => {
       await axios.delete(`http://localhost:5000/api/company/jobs/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      // Optimistic UI update or refetch
       setJobs(prev => prev.filter(job => job.JobID !== id));
     } catch (err) {
       console.error(err);
@@ -67,30 +67,17 @@ const CompanyJobs = () => {
 
   const closeModal = () => {
     setShowModal(false);
-    setTimeout(() => setSelectedJob(null), 200); // Clear after animation
+    setTimeout(() => setSelectedJob(null), 200);
   };
 
-  // Helper: Roman Numerals
-  const toRoman = (num) => {
-    const roman = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
-    const val = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
-    let result = '';
-    for (let i = 0; i < val.length; i++) {
-      while (num >= val[i]) {
-        num -= val[i];
-        result += roman[i];
-      }
-    }
-    return result;
-  };
-
-  // --- React Table Columns Configuration ---
+  // --- React Table Columns ---
   const columns = useMemo(() => [
     {
       header: 'SI',
-      accessorFn: (row, i) => toRoman(i + 1),
+      // UPDATED: Now returns normal numbers (1, 2, 3...)
+      accessorFn: (row, i) => i + 1,
       cell: info => <span className="font-mono text-gray-500 font-semibold">{info.getValue()}</span>,
-      size: 500,
+      size: 50,
     },
     {
       header: 'Job Title',
@@ -101,7 +88,7 @@ const CompanyJobs = () => {
       header: 'Location',
       accessorFn: row => `${row.City}, ${row.Country}`,
       cell: info => (
-        <div className="flex items-center gap-1 text-sm text-gray-600">
+        <div className="flex items-center justify-center gap-1 text-sm text-gray-600">
           <FaMapMarkerAlt className="text-gray-400" /> {info.getValue()}
         </div>
       )
@@ -110,7 +97,7 @@ const CompanyJobs = () => {
       header: 'Salary',
       accessorFn: row => `${row.SalaryFrom} - ${row.SalaryTo} ${row.Currency}`,
       cell: info => (
-        <div className="flex items-center gap-1 text-sm text-gray-600">
+        <div className="flex items-center justify-center gap-1 text-sm text-gray-600 font-medium">
            {info.getValue()}
         </div>
       )
@@ -130,7 +117,7 @@ const CompanyJobs = () => {
       cell: ({ row }) => (
         <button
           onClick={() => navigate(`/company/${companyUrl}/jobs/${row.original.JobID}/candidates`, { state: { jobTitle: row.original.JobTitle } })}
-          className="flex items-center justify-center gap-2 w-full py-1.5 px-3 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors"
+          className="flex items-center justify-center gap-2 mx-auto py-1.5 px-3 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors"
         >
           <FaUsers size={14} /> View List
         </button>
@@ -138,22 +125,27 @@ const CompanyJobs = () => {
     },
     {
       header: 'Veiw Details',
-      id: 'detailss',
+      id: 'veiw',
       cell: ({ row }) => (
-        <div className="flex justify-center items-center gap-3">
-          <button onClick={() => openModal(row.original)} className="text-blue-900 hover:text-blue-600 transition-colors" title="View Details">
+        <div className="flex justify-center  items-center gap-3">
+          <button onClick={() => openModal(row.original)} className=" text-blue-900 hover:text-blue-600 transition-colors p-1" title="View Details">
             <FaEye size={18} />
           </button>
+
         </div>
       )
     },
         {
       header: 'Update',
-      id: 'edit',
+      id: 'update',
       cell: ({ row }) => (
         <div className="flex justify-center items-center gap-3">
 
-          <button onClick={() => navigate(`/company/${companyUrl}/jobs/edit/${row.original.JobID}`)} className="text-blue-500 hover:text-green-600 transition-colors" title="Edit">
+          <button
+            onClick={() => navigate(`/company/${companyUrl}/jobs/edit/${row.original.JobID}`)}
+            className="text-green-700 hover:text-green-300 transition-colors p-1"
+            title="Edit"
+          >
             <FaEdit size={18} />
           </button>
 
@@ -165,7 +157,8 @@ const CompanyJobs = () => {
       id: 'delete',
       cell: ({ row }) => (
         <div className="flex justify-center items-center gap-3">
-          <button onClick={() => deleteJob(row.original.JobID)} className="text-red-500 hover:text-red-800 transition-colors" title="Delete">
+
+          <button onClick={() => deleteJob(row.original.JobID)} className="text-red-600 hover:text-red-400 transition-colors p-1" title="Delete">
             <FaTrash size={17} />
           </button>
         </div>
@@ -173,7 +166,6 @@ const CompanyJobs = () => {
     }
   ], [companyUrl, navigate]);
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: jobs,
     columns,
@@ -207,7 +199,7 @@ const CompanyJobs = () => {
               />
             <Link
               to={`/company/${companyUrl}/jobs/create`}
-              className="flex items-center justify-center gap-2 bg-linear-to-r from-blue-700 to-blue-900 text-white px-5 py-2.5 rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm font-medium whitespace-nowrap"
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-700 to-blue-900 text-white px-5 py-2.5 rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm font-medium whitespace-nowrap"
             >
               + Create Job
             </Link>
@@ -215,14 +207,14 @@ const CompanyJobs = () => {
         </div>
 
         {/* --- Table Section --- */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-400 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead className="bg-gray-50 border-b border-gray-200">
                 {table.getHeaderGroups().map(headerGroup => (
                   <tr key={headerGroup.id}>
                     {headerGroup.headers.map(header => (
-                      <th key={header.id} className="px-6 py-4 text-sm font-bold text-blue-800 uppercase tracking-wider text-center first:text-left">
+                      <th key={header.id} className="px-6 py-4 text-sm font-bold text-gray-600 uppercase tracking-wider text-center first:text-left">
                         {flexRender(header.column.columnDef.header, header.getContext())}
                       </th>
                     ))}
@@ -238,7 +230,7 @@ const CompanyJobs = () => {
                   </tr>
                 ) : (
                   table.getRowModel().rows.map(row => (
-                    <tr key={row.id} className="hover:bg-blue-50/30 transition-colors duration-150 group">
+                    <tr key={row.id} className="hover:bg-blue-50/50 transition-colors duration-150">
                       {row.getVisibleCells().map(cell => (
                         <td key={cell.id} className="px-6 py-4 text-sm text-center first:text-left whitespace-nowrap">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -278,77 +270,150 @@ const CompanyJobs = () => {
         </div>
       </div>
 
-      {/* --- Beautiful Modal --- */}
+      {/* --- RE-DESIGNED BEAUTIFUL MODAL --- */}
       {showModal && selectedJob && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onClick={closeModal}></div>
+          <div 
+            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" 
+            onClick={closeModal}
+          ></div>
           
-          <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200">
-            {/* Modal Header */}
-            <div className="bg-linear-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+          <div className="relative bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200 border-t-4 border-indigo-600">
+            
+            {/* 1. Modal Header (Fixed) */}
+            <div className="bg-white px-6 py-4 border-b border-gray-100 flex justify-between items-center sticky top-0 z-10">
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <FaBriefcase className="text-blue-600" />
-                Job Details
+                <FaBriefcase className="text-indigo-600" />
+                Job Overview
               </h3>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 p-1.5 rounded-full transition-colors">
+              <button 
+                onClick={closeModal} 
+                className="text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 p-2 rounded-full transition-all duration-200"
+              >
                 <FaTimes />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="p-6 space-y-6">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900">{selectedJob.JobTitle}</h2>
-                <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full uppercase tracking-wide">
-                  Active
-                </span>
+            {/* 2. Modal Body (Scrollable) */}
+            <div className="p-6 overflow-y-auto max-h-[70vh] custom-scrollbar">
+              
+              {/* Hero Section */}
+              <div className="mb-6">
+                <h2 className="text-2xl font-extrabold text-gray-900 leading-tight">{selectedJob.JobTitle}</h2>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span> Active
+                  </span>
+                  <span className="text-sm text-gray-500">Posted in {selectedJob.City}, {selectedJob.Country}</span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                  <span className="block text-gray-400 text-xs uppercase font-bold mb-1">Salary Range</span>
-                  <div className="flex items-center gap-2 text-gray-700 font-medium">
-                     <FaMoneyBillWave className="text-green-500" />
-                     {selectedJob.SalaryFrom} - {selectedJob.SalaryTo} {selectedJob.Currency}
+              {/* Key Metrics Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="bg-linear-to-br from-blue-50 to-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                  <span className="block text-blue-500 text-xs uppercase font-bold mb-1 tracking-wider">Salary Range</span>
+                  <div className="flex items-center gap-2 text-gray-800 font-bold text-lg">
+                    <FaMoneyBillWave className="text-blue-500 text-xl" />
+                    {selectedJob.SalaryFrom} - {selectedJob.SalaryTo} <span className="text-sm font-normal text-gray-500">{selectedJob.Currency}</span>
+                  </div>
+                  <span className="text-xs text-gray-500 mt-1 capitalize">{selectedJob.SalaryType}</span>
+                </div>
+                
+                <div className="bg-linear-to-br from-indigo-50 to-white p-4 rounded-xl border border-indigo-100 shadow-sm">
+                  <span className="block text-indigo-500 text-xs uppercase font-bold mb-1 tracking-wider">Location & Type</span>
+                  <div className="flex items-center gap-2 text-gray-800 font-bold text-lg">
+                     <FaMapMarkerAlt className="text-indigo-500 text-xl" />
+                     {selectedJob.JobLocation}
+                  </div>
+                  <span className="text-xl text-gray-900 mt-1 capitalize">{selectedJob.JobType}</span>
+                </div>
+              </div>
+
+              {/* Description Blocks */}
+              <div className="space-y-6">
+                
+                {/* Job Description */}
+                <div>
+                   <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-l-4 border-indigo-500 pl-3 mb-3">
+                     Job Description
+                   </h4>
+                   <div className="text-gray-600 text-sm leading-relaxed bg-gray-50 p-4 rounded-lg">
+                     {selectedJob.JobDescription || "No description provided."}
+                   </div>
+                </div>
+
+                {/* Grid Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div>
+                      <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-l-4 border-purple-500 pl-3 mb-3">
+                        Qualifications
+                      </h4>
+                      <p className="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">
+                        {selectedJob.Qualifications || "N/A"}
+                      </p>
+                   </div>
+                   <div>
+                      <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-l-4 border-teal-500 pl-3 mb-3">
+                        Benefits
+                      </h4>
+                      <p className="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">
+                         {selectedJob.Benefits || "N/A"}
+                      </p>
+                   </div>
+                </div>
+
+                {/* Skills */}
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide border-l-4 border-orange-500 pl-3 mb-3">
+                     Required Skills
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedJob.Skills ? (
+                      selectedJob.Skills.split(',').map((skill, index) => (
+                        <span key={index} className="px-3 py-1 bg-white border border-gray-200 rounded-full text-xs font-semibold text-gray-700 shadow-sm">
+                          {skill.trim()}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-gray-400 text-sm">No specific skills listed.</span>
+                    )}
                   </div>
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                  <span className="block text-gray-400 text-xs uppercase font-bold mb-1">Location</span>
-                  <div className="flex items-center gap-2 text-gray-700 font-medium">
-                     <FaMapMarkerAlt className="text-red-400" />
-                     {selectedJob.City}, {selectedJob.Country}
+
+                {/* Extra Details */}
+                <div className="grid grid-cols-2 gap-4 border-t border-gray-100 pt-4 mt-4">
+                  <div>
+                    <span className="text-xs text-gray-900 font-bold uppercase block mb-1">Responsibilities</span>
+                    <p className="text-xs text-gray-600">{selectedJob.JobResponsibilities ? (selectedJob.JobResponsibilities.substring(0, 100) + '...') : "N/A"}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs text-gray-900 font-bold uppercase block mb-1">Vacation Policy</span>
+                    <div className="flex items-center gap-1 text-sm text-gray-700">
+                      <FaCheckCircle className="text-green-500 text-xs" /> 
+                      {selectedJob.WeeklyVacation}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <span className="block text-gray-400 text-xs uppercase font-bold mb-2">Description</span>
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 text-gray-600 leading-relaxed max-h-40 overflow-y-auto text-sm">
-                  {selectedJob.JobDescription || "No description provided."}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 pt-2 border-t border-gray-100">
-                 <div>
-                    <span className="font-semibold text-gray-900">Address:</span> <br/>
-                    {selectedJob.Address || "N/A"}
-                 </div>
-                 <div>
-                    <span className="font-semibold text-gray-900">State:</span> <br/>
-                    {selectedJob.State || "N/A"}
-                 </div>
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+            {/* 3. Modal Footer (Fixed) */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 sticky bottom-0 border-t border-gray-100">
               <button 
                 onClick={closeModal}
                 className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium text-sm transition-colors shadow-sm"
               >
                 Close
               </button>
+              <button 
+                onClick={() => navigate(`/company/${companyUrl}/jobs/edit/${selectedJob.JobID}`)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium text-sm transition-colors shadow-sm flex items-center gap-2"
+              >
+                <FaEdit /> Edit Job
+              </button>
             </div>
+
           </div>
         </div>
       )}

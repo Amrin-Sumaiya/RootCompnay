@@ -253,9 +253,14 @@ const AllJobs = () => {
                 <div>
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
-                        {job.JobTitle}
-                      </h3>
+<Link
+  // We use .replace(/^\//, "") to remove the leading '/' if it exists in the DB data
+  to={`/jobs/${job.Company_URL.replace(/^\//, "")}/${job.JobSlug}`} 
+  className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors"
+>
+  {job.JobTitle}
+</Link>
+
                       <div className="flex items-center mt-1 text-sm text-gray-500 font-medium">
                           <BuildingIcon />
                           <Link

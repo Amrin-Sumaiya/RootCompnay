@@ -78,6 +78,7 @@ const Read = () => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this company?')) return;
     try {
@@ -165,7 +166,7 @@ const Read = () => {
         </button>
       )
     }
-  ], []); 
+  ], [handleDelete]); 
 
   const table = useReactTable({
     data: companies,
