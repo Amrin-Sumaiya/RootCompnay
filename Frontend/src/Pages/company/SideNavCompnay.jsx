@@ -57,7 +57,7 @@ const SideNavbarCompany = () => {
         {/* 1. HEADER (Logo & Toggle) */}
         <div className="h-20 flex items-center justify-between px-6 border-b border-slate-800 shrink-0">
           {!collapsed && (
-            <span className="font-bold text-xl tracking-wide bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent whitespace-nowrap">
+            <span className="font-bold text-xl tracking-wide bg-linear-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent whitespace-nowrap">
               Company Panel
             </span>
           )}

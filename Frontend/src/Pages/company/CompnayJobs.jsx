@@ -34,7 +34,7 @@ const CompanyJobs = () => {
 
   useEffect(() => {
     fetchJobs();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+ 
   }, []);
 
   const fetchJobs = async () => {
@@ -166,6 +166,7 @@ const CompanyJobs = () => {
     }
   ], [companyUrl, navigate]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: jobs,
     columns,
@@ -199,7 +200,7 @@ const CompanyJobs = () => {
               />
             <Link
               to={`/company/${companyUrl}/jobs/create`}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-700 to-blue-900 text-white px-5 py-2.5 rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm font-medium whitespace-nowrap"
+              className="flex items-center justify-center gap-2 bg-linear-to-r from-blue-700 to-blue-900 text-white px-5 py-2.5 rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-sm font-medium whitespace-nowrap"
             >
               + Create Job
             </Link>
