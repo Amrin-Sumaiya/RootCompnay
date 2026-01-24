@@ -29,12 +29,12 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-sky-50">
+    <section id="contact" className="py-20 bg-green-50">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Title */}
         <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
-            Get in <span className="text-blue-600">Touch</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-green-800">
+            Get in <span className="text-red-600">Touch</span>
           </h2>
           <p className="mt-4 text-gray-600 max-w-xl mx-auto">
             {contactData.paragraph}
@@ -46,7 +46,7 @@ const Contact = () => {
           {/* Contact Info */}
           <div className="space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xl">
+              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-green-100 text-red-600 text-xl">
                 <FaEnvelope />
               </div>
               <div>
@@ -56,7 +56,7 @@ const Contact = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xl">
+              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-green-100 text-red-600 text-xl">
                 <FaPhoneAlt />
               </div>
               <div>
@@ -103,7 +103,7 @@ const Contact = () => {
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              className="w-full flex items-center justify-center gap-2 bg-green-700 text-white py-3 rounded-lg font-semibold hover:bg-green-900 transition"
             >
               <FaPaperPlane />
               Send Message

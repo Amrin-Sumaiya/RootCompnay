@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto px-4 md:flex md:justify-between">
         {/* About Section */}
         <div className="mb-6 md:mb-0">
-          <h2 className="text-xl font-bold mb-2">JobPortal</h2>
+          <h2 className="text-xl font-bold mb-2">IGL Web Ltd .</h2>
           <p className="text-gray-400 text-sm">
             Building better opportunities for everyone. Stay connected with us for latest jobs and updates.
           </p>
@@ -27,8 +27,8 @@ const Footer = () => {
         {/* Contact Info */}
         <div>
           <h3 className="font-semibold mb-2">Contact</h3>
-          <p className="text-gray-400 text-sm">123 Main Street, City, Country</p>
-          <p className="text-gray-400 text-sm">Email: info@mycompany.com</p>
+          <p className="text-gray-400 text-sm">Dhanmondi-4, Road:4(House-33(A))</p>
+          <p className="text-gray-400 text-sm">Email: 445569@IGL.com</p>
           <p className="text-gray-400 text-sm">Phone: +1 234 567 890</p>
 
           {/* Social Icons */}
@@ -43,7 +43,7 @@ const Footer = () => {
 
       {/* Bottom copyright */}
       <div className="mt-8 border-t border-gray-700 pt-4 text-center text-gray-500 text-sm">
-        &copy; {new Date().getFullYear()} MyCompany. All rights reserved.
+        &copy; {new Date().getFullYear()} IGL Web Ltd . All rights reserved.
       </div>
     </footer>
   );

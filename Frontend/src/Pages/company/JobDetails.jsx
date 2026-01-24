@@ -1,15 +1,24 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { 
   FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, 
   FaBriefcase, FaArrowLeft, FaClock, FaGlobe, FaCheck 
 } from "react-icons/fa";
 
+// 1. IMPORT THE MODAL
+import ApplyModal from "../../Componenets/ApplyModal"; 
+
+
 const JobDetails = () => {
   const { companyUrl, jobSlug } = useParams();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // 2. STATE FOR MODAL VISIBILITY
+  const [showModal, setShowModal] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -52,20 +61,24 @@ const JobDetails = () => {
         {/* --- COMPACT HEADER --- */}
         <div className="bg-gray-200 p-6 md:p-8 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <Link to="/jobs" className="text-slate-900 hover:text-white text-sm flex items-center gap-2 mb-3 transition-colors">
-               <FaArrowLeft /> Back to Jobs
-            </Link>
+<button
+  onClick={() => navigate("/company/all-jobs")}
+  className="text-black  bg-gray-400 rounded-full px-3 py-3 hover:text-white text-sm flex items-center gap-2 mb-3 transition-colors"
+>
+  <FaArrowLeft /> Back to Jobs
+</button>
+
             
             <div className="flex items-center gap-3 mb-2">
                 <div className="bg-blue-600 p-2 rounded-lg">
                     <FaBuilding className="text-white text-lg"/>
                 </div>
-                <Link to={`/company/${cleanCompanyUrl}/dashboard`} className="font-semibold text-blue-900 hover:text-white transition-colors">
+                <Link to={`/company/${cleanCompanyUrl}/dashboard`} className="font-bold text-3xl text-blue-900 hover:text-white transition-colors">
                     {cleanCompanyUrl}
                 </Link>
             </div>
 
-            <h1 className="text-2xl md:text-3xl text-black  font-bold leading-tight">{job.JobTitle}</h1>
+            <h1 className="text-2xl md:text-2xl text-black  font-bold leading-tight">{job.JobTitle}</h1>
             
             <div className="flex flex-wrap gap-4 mt-3 text-sm text-slate-900">
                 <span className="flex items-center gap-1"><FaMapMarkerAlt/> {job.City}, {job.Country}</span>
@@ -81,7 +94,12 @@ const JobDetails = () => {
                     {job.SalaryFrom} - {job.SalaryTo} <span className="text-sm">{job.Currency}</span>
                 </span>
              </div>
-             <button className="bg-white text-slate-900 hover:bg-blue-50 px-6 py-2 rounded-lg font-bold text-sm transition-colors shadow-sm w-full md:w-auto">
+             
+             {/* 3. BUTTON CLICK HANDLER (DESKTOP) */}
+             <button 
+                onClick={() => setShowModal(true)}
+                className="bg-white text-slate-900 hover:bg-blue-50 px-6 py-2 rounded-lg font-bold text-sm transition-colors shadow-sm w-full md:w-auto"
+             >
                 Apply Now
              </button>
           </div>
@@ -103,18 +121,18 @@ const JobDetails = () => {
 
                 {/* Responsibilities */}
                 <div>
-                     <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide border-b pb-2 mb-3">Responsibilities</h3>
-                     <div className="text-slate-600 text-sm leading-6 whitespace-pre-line">
+                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide border-b pb-2 mb-3">Responsibilities</h3>
+                      <div className="text-slate-600 text-sm leading-6 whitespace-pre-line">
                         {job.JobResponsibilities}
-                     </div>
+                      </div>
                 </div>
 
                 {/* Qualifications */}
                 <div>
-                     <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide border-b pb-2 mb-3">Requirements</h3>
-                     <p className="text-slate-600 text-sm leading-6 whitespace-pre-line">
+                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide border-b pb-2 mb-3">Requirements</h3>
+                      <p className="text-slate-600 text-sm leading-6 whitespace-pre-line">
                         {job.Qualifications}
-                     </p>
+                      </p>
                 </div>
 
             </div>
@@ -171,14 +189,25 @@ const JobDetails = () => {
                     </div>
                 )}
 
-                {/* Mobile Apply Button (Visible only on small screens) */}
-                <button className="w-full mt-6 bg-blue-600 text-white font-bold py-3 rounded-lg md:hidden shadow-lg shadow-blue-500/30">
+                {/* 3. BUTTON CLICK HANDLER (MOBILE) */}
+                <button 
+                    onClick={() => setShowModal(true)}
+                    className="w-full mt-6 bg-blue-600 text-white font-bold py-3 rounded-lg md:hidden shadow-lg shadow-blue-500/30"
+                >
                     Apply Now
                 </button>
 
             </div>
         </div>
       </div>
+
+      {/* 4. RENDER THE MODAL COMPONENT */}
+      <ApplyModal 
+        isOpen={showModal} 
+        onClose={() => setShowModal(false)} 
+        job={job} 
+      />
+
     </div>
   );
 };

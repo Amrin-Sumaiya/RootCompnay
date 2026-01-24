@@ -38,10 +38,10 @@ const Navigation = () => {
   const NavLink = ({ label, target }) => (
     <button
       onClick={() => scrollToSection(target)}
-      className="text-gray-600 hover:text-blue-600 font-medium transition-colors duration-200 text-sm lg:text-base relative group"
+      className="text-gray-600 hover:text-green-600 font-medium transition-colors duration-200 text-sm lg:text-base relative group"
     >
       {label}
-      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full duration-300"></span>
+      <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-600 transition-all group-hover:w-full duration-300"></span>
     </button>
   );
 
@@ -62,15 +62,20 @@ const Navigation = () => {
             className="flex items-center gap-1 group"
           >
             <div className="text-2xl md:text-3xl font-extrabold tracking-tighter text-gray-900 group-hover:opacity-80 transition-opacity">
-              <span className="text-orange-500">Job</span>
-              <span className="text-blue-700">Portal</span>
+              <span className="text-red-600">IGL</span>
+              <span className="text-green-700"> Web Ltd .</span>
             </div>
           </button>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-8 items-center">
             <NavLink label="Home" target="hero" />
-            <NavLink label="About" target="about" />
+                        <button
+              onClick={() => navigate("/aboutpage")}
+              className="font-semibold text-sm text-gray-700  hover:text-green-600 hidden md:flex space-x-8 items-center"
+            >
+              About
+            </button>
             <NavLink label="Features" target="features" />
             <NavLink label="Contact" target="contact" />
 
@@ -79,14 +84,14 @@ const Navigation = () => {
 
             <button
               onClick={() => navigate("/company/all-jobs")}
-              className="text-gray-700 font-semibold hover:text-blue-600 transition-colors flex items-center gap-1"
+              className="text-gray-700 font-semibold hover:text-green-600 transition-colors flex items-center gap-1"
             >
               Browse Jobs
             </button>
 
             <button
               onClick={() => navigate("/login")}
-              className="bg-blue-600 text-white px-6 py-2.5 rounded-full font-medium shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:shadow-blue-600/40 transform hover:-translate-y-0.5 transition-all duration-200"
+              className="bg-green-700 text-white px-6 py-2.5 rounded-full font-medium shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:shadow-blue-600/40 transform hover:-translate-y-0.5 transition-all duration-200"
             >
               Login
             </button>
@@ -96,7 +101,7 @@ const Navigation = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setOpen(!open)}
-              className="text-gray-600 hover:text-blue-600 focus:outline-none p-2"
+              className="text-gray-600 hover:text-green-600 focus:outline-none p-2"
             >
               {open ? (
                 // X Icon
@@ -123,25 +128,25 @@ const Navigation = () => {
         <div className="flex flex-col px-6 py-6 space-y-4">
           <button 
             onClick={() => scrollToSection("hero")} 
-            className="text-left text-lg font-medium text-gray-700 hover:text-blue-600"
+            className="text-left text-lg font-medium text-gray-700 hover:text-green-600"
           >
             Home
           </button>
           <button 
             onClick={() => scrollToSection("about")}
-            className="text-left text-lg font-medium text-gray-700 hover:text-blue-600"
+            className="text-left text-lg font-medium text-gray-700 hover:text-green-600"
           >
             About
           </button>
           <button 
             onClick={() => scrollToSection("features")}
-            className="text-left text-lg font-medium text-gray-700 hover:text-blue-600"
+            className="text-left text-lg font-medium text-gray-700 hover:text-green-600"
           >
             Features
           </button>
           <button 
             onClick={() => scrollToSection("contact")}
-            className="text-left text-lg font-medium text-gray-700 hover:text-blue-600"
+            className="text-left text-lg font-medium text-gray-700 hover:text-green-600"
           >
             Contact
           </button>
@@ -150,7 +155,7 @@ const Navigation = () => {
 
           <button 
             onClick={() => { navigate("/company/all-jobs"); setOpen(false); }}
-            className="text-left text-lg font-bold text-blue-800 flex items-center gap-2"
+            className="text-left text-lg font-bold text-green-800 flex items-center gap-2"
           >
             Find a Job 
             <span>→</span>
@@ -158,7 +163,7 @@ const Navigation = () => {
 
           <button
             onClick={() => { navigate("/login"); setOpen(false); }}
-            className="w-full bg-blue-600 text-white text-center py-3 rounded-lg font-bold shadow-md active:scale-95 transition-transform"
+            className="w-full bg-green-700 text-white text-center py-3 rounded-lg font-bold shadow-md active:scale-95 transition-transform"
           >
             Login / Sign Up
           </button>

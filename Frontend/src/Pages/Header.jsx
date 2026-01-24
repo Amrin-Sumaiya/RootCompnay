@@ -36,7 +36,7 @@ const Header = () => {
         {/* Headline */}
         <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 drop-shadow-lg">
           Let’s Find Your <br className="hidden md:block" />
-          <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-emerald-400">
+          <span className="text-transparent bg-clip-text bg-linear-to-r from-red-600 to-emerald-400">
             Dream Job
           </span>
         </h1>
@@ -50,7 +50,7 @@ const Header = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button
             onClick={() => navigate("/company/all-jobs")}
-            className="group relative px-8 py-4 bg-blue-600 text-white font-semibold rounded-full shadow-lg shadow-blue-500/30 hover:bg-blue-500 hover:shadow-blue-500/50 transition-all duration-300 flex items-center gap-2"
+            className="group relative px-8 py-4 bg-green-700 text-white font-semibold rounded-full shadow-lg shadow-blue-500/30 hover:bg-blue-500 hover:shadow-blue-500/50 transition-all duration-300 flex items-center gap-2"
           >
             <Search size={20} />
             Browse Jobs
@@ -74,7 +74,7 @@ const Header = () => {
           ].map((stat, index) => (
             <div 
               key={index} 
-              className="flex items-center justify-center gap-4 p-4 rounded-2xl bg-sky-50 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors cursor-default"
+              className="flex items-center justify-center gap-4 p-4 rounded-2xl bg-green-100 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors cursor-default"
             >
               <div className="p-3 rounded-full bg-blue-100/20 text-blue-800">
                 <stat.icon size={24} />

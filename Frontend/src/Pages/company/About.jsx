@@ -19,7 +19,7 @@ const About = () => {
   };
 
   return (
-    <section id="about" className="py-20 bg-sky-100">
+    <section id="about" className="py-20 bg-green-50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           
@@ -30,15 +30,15 @@ const About = () => {
               alt="About Job Portal"
               className="rounded-2xl shadow-lg w-full"
             />
-            <div className="absolute -bottom-6 -right-6 bg-blue-600 text-white px-6 py-4 rounded-xl shadow-lg hidden sm:block">
+            <div className="absolute -bottom-6 -right-6 bg-green-700 text-white px-6 py-4 rounded-xl shadow-lg hidden sm:block">
               <p className="text-lg font-semibold">10K+ Jobs Posted</p>
             </div>
           </div>
              
           {/* Content */}
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800">
-              About <span className="text-blue-600">Us</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-green-700">
+              About <span className="text-red-600">Us</span>
             </h2>
 
             <p className="mt-6 text-gray-600 text-lg leading-relaxed">

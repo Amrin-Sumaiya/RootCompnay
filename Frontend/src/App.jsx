@@ -8,6 +8,7 @@ import PublicLayout from "./layouts/PublicLayout.jsx";
 import Home from "./Componenets/Hero.jsx";
 import RootLogin from "./Pages/RootLogin.jsx";
 import AllJobs from "./Pages/company/AllJobs.jsx";
+import AboutUss from "./Pages/company/AboutUss.jsx";
 
 // Root Dashboard Pages
 import AdminLayout from "./Pages/AdminLayout.jsx";
@@ -34,6 +35,7 @@ const App = () => {
         <Route element={<PublicLayout />}>
          
           <Route path="/hero" element={<Home />} />
+          <Route path="/aboutpage" element={ <AboutUss /> } />
           <Route path="/login" element={<RootLogin />} />
           <Route path="/company/all-jobs" element={<AllJobs />} />
           <Route path="/jobs/:companyUrl/:jobSlug" element={<JobDetails />} />
