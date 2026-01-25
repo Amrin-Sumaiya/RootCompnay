@@ -25,6 +25,9 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 
+//candidates login
+app.use('/api/candidate-auth', require('./routes/candidate.auth.routes'));
+
 // Company dashboard and add_company
 app.use('/api/comp', companyRoutes);
 app.use('/api/igl', userRoutes);

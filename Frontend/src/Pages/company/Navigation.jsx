@@ -63,7 +63,7 @@ const Navigation = () => {
           >
             <div className="text-2xl md:text-3xl font-extrabold tracking-tighter text-gray-900 group-hover:opacity-80 transition-opacity">
               <span className="text-red-600">IGL</span>
-              <span className="text-green-700"> Web Ltd .</span>
+              <span className="text-green-700"> Web Ltd.</span>
             </div>
           </button>
 
@@ -91,9 +91,15 @@ const Navigation = () => {
 
             <button
               onClick={() => navigate("/login")}
-              className="bg-green-700 text-white px-6 py-2.5 rounded-full font-medium shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:shadow-blue-600/40 transform hover:-translate-y-0.5 transition-all duration-200"
+              className=" text-gray-700 px-4 py-1 hover:text-red-700  font-medium   transform hover:-translate-y-0.5 transition-all duration-100"
             >
-              Login
+              Admin/Compnay Login
+            </button>
+                        <button
+              onClick={() => navigate("/candidateslogin")}
+              className=" text-gray-700 px-5 py-1 hover:text-red-700 font-medium  transform hover:-translate-y-0.5 transition-all duration-100"
+            >
+              Candidates Login
             </button>
           </div>
 
