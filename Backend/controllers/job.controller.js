@@ -213,7 +213,7 @@ exports.deleteJob = (req, res) => {
 exports.getAllJobs = (req, res) => {
   const sql = `
     SELECT
-      JobID, CompanyID, Company_URL, JobTitle, JobSlug, JobLink,
+      JobID, CompanyID,  JobTitle, JobSlug, JobLink,
       JobDescription, JobResponsibilities, Qualifications, Skills,
       JobType, WeeklyVacation, Benefits, Experience, JobLocation,
       Address, Country, State, City,
@@ -228,29 +228,68 @@ exports.getAllJobs = (req, res) => {
   });
 };
 
+// ================= GET ALL JOBS (PUBLIC) =================
+exports.getAllJobs = (req, res) => {
+
+  
+  // UPDATE: We use JOIN to get the CompanyName from the company table
+  const sql = `
+    SELECT 
+      jobs.*, 
+      company.CompanyName, 
+      company.Company_URL
+    FROM jobs 
+    JOIN company ON jobs.CompanyID = company.CompanyID 
+    ORDER BY jobs.CreatedAt DESC
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json(err);
+    res.json(results);
+
+  });
+   
+};
+
+ 
+
 
 // ================= PUBLIC JOB DETAILS =================
 exports.getPublicJobDetails = (req, res) => {
   const { companyUrl, jobSlug } = req.params;
 
-  // FIX: Check for Company_URL with OR without the slash
+  if (!companyUrl || !jobSlug) {
+    return res.status(400).json({ message: "Invalid parameters" });
+  }
+
+  const cleanUrl = companyUrl.replace(/^\//, "");
+  const slashUrl = `/${cleanUrl}`;
+
   const sql = `
-    SELECT *
+    SELECT 
+      jobs.*,
+      company.CompanyName,
+      company.Company_URL
     FROM jobs
-    WHERE (Company_URL = ? OR Company_URL = ?) AND JobSlug = ?
+    JOIN company ON jobs.CompanyID = company.CompanyID
+    WHERE (company.Company_URL = ? OR company.Company_URL = ?)
+      AND jobs.JobSlug = ?
     LIMIT 1
   `;
 
-  // We pass companyUrl twice: once as is (e.g. "igl") and once with a slash (e.g. "/igl")
-  const slashUrl = companyUrl.startsWith('/') ? companyUrl : `/${companyUrl}`;
-  const cleanUrl = companyUrl.replace(/^\//, "");
-
   db.query(sql, [cleanUrl, slashUrl, jobSlug], (err, result) => {
-    if (err) return res.status(500).json(err);
-    if (!result.length)
-      return res.status(404).json({ message: 'Job not found' });
+    if (err) {
+      console.error("SQL Error:", err);
+      return res.status(500).json(err);
+    }
+
+    if (!result.length) {
+      return res.status(404).json({ message: "Job not found" });
+    }
 
     res.json(result[0]);
   });
 };
+
+
 

@@ -7,7 +7,7 @@ const AboutUss = () => {
     <div className="bg-white min-h-screen font-sans text-slate-800">
       
       {/* --- HERO SECTION --- */}
-      <div className="relative bg-green-700 py-20 px-6 text-center text-white overflow-hidden">
+      <div className="relative bg-green-900 py-20 px-6 text-center text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div className="relative max-w-4xl mx-auto z-10">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">
