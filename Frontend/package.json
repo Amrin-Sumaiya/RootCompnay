@@ -14,6 +14,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.13.2",
+    "bd-instituition-list-by-solutya": "^1.2.0",
     "bootstrap": "^5.3.8",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.14.0",

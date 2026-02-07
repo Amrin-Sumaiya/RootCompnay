@@ -34,49 +34,48 @@ exports.createJob = (req, res) => {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
-  const jobLink = `/${companyUrl}/${slug}`;
+  // const jobLink = `/${companyUrl}/${slug}`;
 
-  const sql = `
-    INSERT INTO jobs (
-      CompanyID, Company_URL, JobTitle, JobSlug, JobLink,
-      JobDescription, JobResponsibilities, Qualifications, Skills,
-      JobType, WeeklyVacation, Benefits, Experience, JobLocation,
-      Address, Country, State, City,
-      SalaryFrom, SalaryTo, SalaryType, Currency
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+const sql = `
+  INSERT INTO jobs (
+    CompanyID, JobTitle, JobSlug,
+    JobDescription, JobResponsibilities, Qualifications, Skills,
+    JobType, WeeklyVacation, Benefits, Experience, JobLocation,
+    Address, Country, State, City,
+    SalaryFrom, SalaryTo, SalaryType, Currency
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`;
 
-  db.query(
-    sql,
-    [
-      companyId,
-      companyUrl,
-      JobTitle,
-      slug,
-      jobLink,
-      JobDescription,
-      JobResponsibilities,
-      Qualifications,
-      Skills,
-      JobType,
-      WeeklyVacation,
-      Benefits,
-      Experience,
-      JobLocation,
-      Address,
-      Country,
-      State,
-      City,
-      SalaryFrom,
-      SalaryTo,
-      SalaryType,
-      Currency
-    ],
-    (err) => {
-      if (err) return res.status(500).json(err);
-      res.status(201).json({ message: 'Job created successfully', jobLink });
-    }
-  );
+db.query(
+  sql,
+  [
+    companyId,
+    JobTitle,
+    slug,
+    JobDescription,
+    JobResponsibilities,
+    Qualifications,
+    Skills,
+    JobType,
+    WeeklyVacation,
+    Benefits,
+    Experience,
+    JobLocation,
+    Address,
+    Country,
+    State,
+    City,
+    SalaryFrom,
+    SalaryTo,
+    SalaryType,
+    Currency
+  ],
+  (err) => {
+    if (err) return res.status(500).json(err);
+    res.status(201).json({ message: 'Job created successfully' });
+  }
+);
+
 };
 
 // ================= GET COMPANY JOBS =================
@@ -96,7 +95,7 @@ exports.getCompanyJobs = (req, res) => {
 // ================= UPDATE JOB =================
 exports.updateJob = (req, res) => {
   const { id } = req.params;
-  const { companyId, companyUrl } = req.user;
+  const { companyId } = req.user;
 
   const {
     JobTitle,
@@ -212,44 +211,45 @@ exports.deleteJob = (req, res) => {
 // ================= GET ALL JOBS (PUBLIC) =================
 exports.getAllJobs = (req, res) => {
   const sql = `
-    SELECT
-      JobID, CompanyID,  JobTitle, JobSlug, JobLink,
-      JobDescription, JobResponsibilities, Qualifications, Skills,
-      JobType, WeeklyVacation, Benefits, Experience, JobLocation,
-      Address, Country, State, City,
-      SalaryFrom, SalaryTo, SalaryType, Currency, CreatedAt
-    FROM jobs
-    ORDER BY CreatedAt DESC
-  `;
-
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json(err);
-    res.json(results);
-  });
-};
-
-// ================= GET ALL JOBS (PUBLIC) =================
-exports.getAllJobs = (req, res) => {
-
-  
-  // UPDATE: We use JOIN to get the CompanyName from the company table
-  const sql = `
     SELECT 
       jobs.*, 
-      company.CompanyName, 
+      company.CompanyName,
       company.Company_URL
-    FROM jobs 
-    JOIN company ON jobs.CompanyID = company.CompanyID 
+    FROM jobs
+    LEFT JOIN company ON jobs.CompanyID = company.CompanyID
+    WHERE company.Company_URL IS NOT NULL
     ORDER BY jobs.CreatedAt DESC
   `;
 
   db.query(sql, (err, results) => {
     if (err) return res.status(500).json(err);
     res.json(results);
-
   });
-   
 };
+
+
+// // ================= GET ALL JOBS (PUBLIC) =================
+// exports.getAllJobs = (req, res) => {
+
+  
+//   // UPDATE: We use JOIN to get the CompanyName from the company table
+//   const sql = `
+//     SELECT 
+//       jobs.*, 
+//       company.CompanyName, 
+//       company.Company_URL
+//     FROM jobs 
+//     JOIN company ON jobs.CompanyID = company.CompanyID 
+//     ORDER BY jobs.CreatedAt DESC
+//   `;
+
+//   db.query(sql, (err, results) => {
+//     if (err) return res.status(500).json(err);
+//     res.json(results);
+
+//   });
+   
+// };
 
  
 

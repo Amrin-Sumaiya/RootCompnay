@@ -39,7 +39,7 @@ const CompanyJobs = () => {
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/company/jobs', {
+      const res = await axios.get('http://localhost:5000/api/jobs/jobs', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setJobs(res.data);

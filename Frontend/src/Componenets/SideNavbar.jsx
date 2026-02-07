@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-// Importing specific icons for a cleaner look
-import { 
-  Menu, 
-  X, 
-  ChevronLeft, 
-  ChevronRight, 
-  LayoutDashboard, 
-  Building2, 
-  LogOut 
+import { GraduationCap } from "lucide-react";
+
+import {
+  Menu,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  Building2,
+  LogOut,
 } from "lucide-react";
 import Logo from "../assets/igl.png";
 
@@ -19,19 +20,22 @@ const SideNavbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
-  const isActive = (path) => location.pathname === path;
+  // Active route checker (supports nested routes)
+  const isActive = (path) => location.pathname.startsWith(path);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    localStorage.removeItem("role");
+    navigate("/admin/login");
   };
 
-  // Common class for nav items to reduce repetition
   const navItemClass = (path) => `
     flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group font-medium
-    ${isActive(path) 
-      ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/20" 
-      : "text-slate-400 hover:bg-slate-800 hover:text-white"}
+    ${
+      isActive(path)
+        ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/20"
+        : "text-slate-400 hover:bg-slate-800 hover:text-white"
+    }
     ${collapsed ? "justify-center" : ""}
   `;
 
@@ -48,7 +52,7 @@ const SideNavbar = () => {
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden transition-opacity"
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -63,58 +67,69 @@ const SideNavbar = () => {
           ${collapsed ? "w-20" : "w-72"}
         `}
       >
-        {/* Header / Logo Area */}
-        <div className={`flex items-center p-6 border-b border-slate-800 ${collapsed ? "justify-center" : "justify-between"}`}>
+        {/* Logo */}
+        <div
+          className={`flex items-center p-6 border-b border-slate-800 ${
+            collapsed ? "justify-center" : "justify-between"
+          }`}
+        >
           {!collapsed && (
-            <div className="flex items-center gap-2 overflow-hidden">
-               {/* Ensure logo fits well */}
-               <img src={Logo} alt="Logo" className="h-8 object-contain" />
+            <div className="flex items-center gap-2">
+              <img src={Logo} alt="Logo" className="h-8 object-contain" />
             </div>
           )}
-          
-          {/* Desktop Collapse Toggle */}
+
           <button
-            className={`hidden md:flex p-1.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors ${collapsed ? "" : "ml-auto"}`}
+            className="hidden md:flex p-1.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white"
             onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
           </button>
         </div>
 
-        {/* Navigation Items */}
+        {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2 mt-2 overflow-y-auto">
           <Link
-            to="/"
-            className={navItemClass("/")}
+            to="/admin/dashboard"
+            className={navItemClass("/admin/dashboard")}
             onClick={() => setMobileOpen(false)}
-            title={collapsed ? "Dashboard" : ""}
           >
-            <LayoutDashboard size={22} className={isActive("/") ? "text-white" : "text-slate-500 group-hover:text-white transition-colors"} />
+            <LayoutDashboard size={22} />
             {!collapsed && <span>Dashboard</span>}
           </Link>
 
           <Link
-            to="/read"
-            className={navItemClass("/read")}
+            to="/admin/read"
+            className={navItemClass("/admin/read")}
             onClick={() => setMobileOpen(false)}
-            title={collapsed ? "Company List" : ""}
           >
-            <Building2 size={22} className={isActive("/read") ? "text-white" : "text-slate-500 group-hover:text-white transition-colors"} />
+            <Building2 size={22} />
             {!collapsed && <span>Company List</span>}
           </Link>
+
+          <Link
+  to="/admin/professional-courses"
+  className={navItemClass("/admin/professional-courses")}
+  onClick={() => setMobileOpen(false)}
+>
+  <GraduationCap size={22} />
+  {!collapsed && <span>Professional Courses</span>}
+</Link>
+
         </nav>
 
-        {/* Footer / Logout */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900">
+        {/* Logout */}
+        <div className="p-4 border-t border-slate-800">
           <button
             onClick={handleLogout}
             className={`
-              flex items-center w-full rounded-xl transition-all duration-200 font-medium
-              ${collapsed 
-                ? "justify-center p-3 text-rose-500 hover:bg-rose-500/10" 
-                : "gap-3 px-4 py-3 bg-slate-800 text-slate-300 hover:bg-rose-600 hover:text-white hover:shadow-lg hover:shadow-rose-900/20"}
+              flex items-center w-full rounded-xl transition-all font-medium
+              ${
+                collapsed
+                  ? "justify-center p-3 text-rose-500 hover:bg-rose-500/10"
+                  : "gap-3 px-4 py-3 bg-slate-800 text-slate-300 hover:bg-rose-600 hover:text-white"
+              }
             `}
-            title="Logout"
           >
             <LogOut size={20} />
             {!collapsed && <span>Logout</span>}

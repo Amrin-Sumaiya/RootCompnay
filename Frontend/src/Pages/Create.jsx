@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
 const Create = () => {
   const [formData, setFormData] = useState({
-    CompanyName: '',
-    CompanyCode: '',
-    CompanyType: '2',
-    Company_URL: '',
-    FoundedDate: '',
+    companyName: "",
+    companyUrl: "",
+    foundedDate: "",
+    email: "",
+    password: "",
   });
 
   const navigate = useNavigate();
@@ -20,12 +20,24 @@ const Create = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      await axios.post('http://localhost:5000/api/igl/add_company', formData);
-      navigate('/read');
+      await axios.post(
+        "http://localhost:5000/api/admin/company",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      navigate("/admin/read");
     } catch (error) {
-      console.error('Error creating company:', error);
-      alert('Failed to create company!');
+      console.error("Error creating company:", error);
+      alert(
+        error.response?.data?.message || "Failed to create company"
+      );
     }
   };
 
@@ -37,7 +49,7 @@ const Create = () => {
 
       <div className="flex justify-end mb-4">
         <Link
-          to="/"
+          to="/admin"
           className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
         >
           Dashboard
@@ -45,83 +57,78 @@ const Create = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+
         {/* Company Name */}
         <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">
-            Company Name:
-          </label>
+          <label className="block mb-1 font-medium">Company Name</label>
           <input
             type="text"
-            name="CompanyName"
-            value={formData.CompanyName}
+            name="companyName"
+            value={formData.companyName}
             onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             required
+            className="w-full px-3 py-2 border rounded"
           />
         </div>
 
-        {/* Company Code */}
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">
-            Company Code:
-          </label>
-          <input
-            type="text"
-            name="CompanyCode"
-            value={formData.CompanyCode}
-            onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            required
-          />
-        </div>
-
-        {/* Company Type */}
-        <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">
-            Company Type:
-          </label>
-          <input
-            type="text"
-            name="CompanyType"
-            value={formData.CompanyType}
-             readOnly
-            className="w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          />
-        </div>
         {/* Company URL */}
         <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">
-            Company_URL
-          </label>
+          <label className="block mb-1 font-medium">Company URL</label>
           <input
             type="text"
-            name="Company_URL"
-            value={formData.Company_URL}
+            name="companyUrl"
+            value={formData.companyUrl}
             onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            required
+            className="w-full px-3 py-2 border rounded"
           />
         </div>
 
         {/* Founded Date */}
         <div>
-          <label className="block mb-1 font-medium text-gray-700 dark:text-gray-200">
-            Founded Date:
-          </label>
+          <label className="block mb-1 font-medium">Founded Date</label>
           <input
             type="date"
-            name="FoundedDate"
-            value={formData.FoundedDate}
+            name="foundedDate"
+            value={formData.foundedDate}
             onChange={handleChange}
-            className="w-full border border-gray-300 dark:border-gray-600 px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            className="w-full px-3 py-2 border rounded"
           />
         </div>
 
-        {/* Submit */}
+        <hr className="my-4" />
+
+        {/* Company Login Email */}
+        <div>
+          <label className="block mb-1 font-medium">Company Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border rounded"
+          />
+        </div>
+
+        {/* Company Login Password */}
+        <div>
+          <label className="block mb-1 font-medium">Company Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border rounded"
+          />
+        </div>
+
         <button
           type="submit"
           className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
         >
-          Submit
+          Create Company
         </button>
       </form>
     </div>

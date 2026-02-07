@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const CreateJob = () => {
-  const { companyUrl } = useParams();
+  // const { companyUrl } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -36,12 +36,16 @@ const CreateJob = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(
-        'http://localhost:5000/api/company/jobs',
-        form,
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-      );
-      navigate(`/company/${companyUrl}/jobs`);
+await axios.post(
+  'http://localhost:5000/api/jobs/jobs',
+  form,
+  {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  }
+);
+      navigate(`/company/jobs`);
     } catch (err) {
       console.error(err);
       alert('Job creation failed');

@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AuthGuard from "./auth/AuthGuard.jsx";
 import JobDetails from "./Pages/company/JobDetails.jsx";
+import ProfessionalCourses from "./Pages/ProfessionalCourses.jsx";
 
 // ================= PUBLIC PAGES =================
 import PublicLayout from "./layouts/PublicLayout.jsx";
@@ -27,6 +28,7 @@ import CompnayJobs from "./Pages/company/CompnayJobs.jsx";
 import CreateJob from "./Pages/company/CreateJob.jsx";
 import JobCandidates from "./Pages/company/JobCandidates.jsx";
 import UpdateJobPost from "./Pages/company/UpdateJobPost.jsx";
+import Companylogin from "./Pages/company/compnaylogin.jsx";
 
 const App = () => {
   return (
@@ -36,45 +38,50 @@ const App = () => {
         <Route element={<PublicLayout />}>
           <Route path="/hero" element={<Home />} />
           <Route path="/aboutpage" element={<AboutUss />} />
-          <Route path="/login" element={<RootLogin />} />
+          <Route path="/admin/login" element={<RootLogin />} />
+          <Route path="/company/login" element={<Companylogin />} />
           <Route path="/company/all-jobs" element={<AllJobs />} />
           <Route path="/jobs/:companyUrl/:jobSlug" element={<JobDetails />} />
           <Route path="/candidateslogin" element={<CandidatesLogin />} />
         </Route>
 
         {/* ================= CANDIDATE CV (PROTECTED) ================= */}
-        <Route
-          path="/makingcv"
-          element={
-            <AuthGuard role="candidate">
-              <Making />
-            </AuthGuard>
-          }
-        />
+<Route
+  path="/makingcv"
+  element={
+    <AuthGuard role={2}>
+      <Making />
+    </AuthGuard>
+  }
+/>
+
 
         {/* ================= ROOT DASHBOARD (PROTECTED) ================= */}
-        <Route
-          path="/*"
-          element={
-            <AuthGuard role="root">
-              <AdminLayout />
-            </AuthGuard>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="create" element={<Create />} />
-          <Route path="read" element={<Read />} />
-        </Route>
+<Route
+  path="/admin"
+  element={
+    <AuthGuard role={0}>
+      <AdminLayout />
+    </AuthGuard>
+  }
+>
+  <Route path="dashboard" element={<Dashboard />} />
+  <Route path="create" element={<Create />} />
+  <Route path="read" element={<Read />} />
+  <Route path="professional-courses" element={<ProfessionalCourses />} />
+</Route>
+
 
         {/* ================= COMPANY DASHBOARD (PROTECTED) ================= */}
         <Route
-          path="/company/:companyUrl/*"
+          path="/company/:companyUrl"
           element={
-            <AuthGuard role="company">
+            <AuthGuard role={1}>
               <CompanyLayout />
             </AuthGuard>
           }
         >
+           <Route index element={<CompanyDashboard />} />
           <Route path="dashboard" element={<CompanyDashboard />} />
           <Route path="jobs" element={<CompnayJobs />} />
           <Route path="jobs/create" element={<CreateJob />} />

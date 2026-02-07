@@ -26,7 +26,7 @@ const CandidatesAuth = () => {
       }
 
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("role", "candidate");
+      localStorage.setItem("role", "2");
 
       alert(res.data.message || (isLogin ? "Login successful" : "Registration successful"));
       navigate("/makingcv");

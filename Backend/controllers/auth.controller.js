@@ -1,45 +1,57 @@
-// controllers/auth.controller.js
 const db = require('../db');
-const { generateToken } = require('../utils/jwt');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
-/* COMMON LOGIN: root or company */
 exports.login = (req, res) => {
-  const { username, password, company_url } = req.body;
+  const { email, password } = req.body;
 
-  // ROOT LOGIN
-  if (username && password) {
-    if (
-      username === process.env.ROOT_USERNAME &&
-      password === process.env.ROOT_PASSWORD
-    ) {
-      const token = generateToken({ role: 'root' });
-      return res.json({ token, role: 'root' });
-    } else {
-      return res.status(401).json({ message: 'Invalid root credentials' });
-    }
-  }
-
-  // COMPANY LOGIN
-  if (company_url) {
-    db.query(
-      'SELECT CompanyID, CompanyName, Company_URL FROM company WHERE Company_URL = ?',
-      [company_url],
-      (err, result) => {
-        if (err || !result.length) {
-          return res.status(404).json({ message: 'Invalid company URL' });
-        }
-
-        const company = result[0];
-        const token = generateToken({
-          role: 'company',
-          companyId: company.CompanyID,
-          companyUrl: company.Company_URL,
-        });
-
-        res.json({ token, role: 'company', company });
+  db.query(
+    `
+    SELECT 
+      u.id,
+      u.email,
+      u.password,
+      u.type,
+      c.CompanyID,
+      c.Company_URL
+    FROM users u
+    LEFT JOIN company c ON c.user_id = u.id
+    WHERE u.email = ?
+    `,
+    [email],
+    (err, result) => {
+      if (err || !result.length) {
+        return res.status(401).json({ message: 'Invalid credentials' });
       }
-    );
-  } else {
-    return res.status(400).json({ message: 'Please provide credentials' });
-  }
+
+      const user = result[0];
+
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // ✅ JWT ALWAYS USES type
+      const payload = {
+        userId: user.id,
+        type: user.type,
+        email: user.email,
+      };
+
+      if (user.type === 1) {
+        payload.companyId = user.CompanyID;
+        payload.companyUrl = user.Company_URL;
+      }
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: '1d',
+      });
+
+      res.json({
+        token,
+        role: user.type,
+        companyId: user.CompanyID || null,
+        companyUrl: user.Company_URL || null,
+      });
+    }
+  );
 };

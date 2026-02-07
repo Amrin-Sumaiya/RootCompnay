@@ -10,7 +10,7 @@ const CompanyDashboard = () => {
     const fetchDashboard = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await api.get('/comp/company/dashboard', {
+        const res = await api.get('/company/dashboard', {
           headers: { Authorization: `Bearer ${token}` },
         });
 

@@ -1,42 +1,21 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const dotenv = require('dotenv');
-dotenv.config();
-
-const userRoutes = require('./routes/user');
-const jobRoutes = require('./routes/job.routes');
-
+require('dotenv').config();
 
 const app = express();
-const PORT = 5000;
-
-// Middleware
-app.use(express.static(path.join(__dirname, 'public')));
-
-const authRoutes = require('./routes/auth.routes');
-const companyRoutes = require('./routes/company.routes');
-const jobApplicationRoutes= require('./routes/jobApplication.routes')
-
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/admin', require('./routes/admin.routes'));
+app.use('/api/candidate', require('./routes/candidate.routes'));
+app.use('/api/company', require('./routes/company.routes'));
+app.use('/api/jobs', require('./routes/job.routes'));
+app.use('/api/job', require('./routes/jobApplication.routes'));
+app.use('/api/candidate-auth', require('./routes/candidate-auth.routes'));
+app.use('/api/common', require('./routes/common.routes'));
 
 
-// Routes
-app.use('/api/auth', authRoutes);
-
-//candidates login
-app.use('/api/candidate-auth', require('./routes/candidate.auth.routes'));
-
-// Company dashboard and add_company
-app.use('/api/comp', companyRoutes);
-app.use('/api/igl', userRoutes);
-app.use('/auth', require('./routes/auth.routes'));
-app.use('/api/company', jobRoutes);
-app.use('/api/job', jobApplicationRoutes)
-
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(5000, () => console.log('Server running on 5000'));

@@ -1,18 +1,23 @@
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useParams, useNavigate } from "react-router-dom";
 import { FaTachometerAlt, FaBriefcase, FaSignOutAlt, FaBars, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useState } from "react";
 
 const SideNavbarCompany = () => {
   const location = useLocation();
   const { companyUrl } = useParams();
+  const navigate = useNavigate(); 
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-  };
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  localStorage.removeItem("companyUrl");
+
+  navigate("/company/login", { replace: true });
+};
+
 
   const navItems = [
     { name: "Dashboard", path: `/company/${companyUrl}/dashboard`, icon: <FaTachometerAlt /> },
@@ -73,26 +78,27 @@ const SideNavbarCompany = () => {
 
         {/* 2. NAVIGATION (Takes available middle space) */}
         <nav className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-          {navItems.map((item) => {
-            const isActive = location.pathname.includes(item.path.split('/').pop()); // Simple active check
-            return (
-              <Link
-                key={item.name}
-                to={item.path}
-                onClick={() => setMobileOpen(false)} // Close on mobile click
-                className={`
-                  flex items-center gap-4 p-3 rounded-xl transition-all duration-200 font-medium group whitespace-nowrap
-                  ${isActive 
-                    ? "bg-sky-600 text-white shadow-md shadow-sky-900/20" 
-                    : "text-slate-400 hover:bg-slate-800 hover:text-white"}
-                  ${collapsed ? "justify-center" : ""}
-                `}
-              >
-                <span className="text-xl">{item.icon}</span>
-                {!collapsed && <span>{item.name}</span>}
-              </Link>
-            );
-          })}
+{navItems.map((item) => {
+  const isActive = location.pathname === item.path || location.pathname.startsWith(item.path);
+  return (
+    <Link
+      key={item.name}
+      to={item.path}
+      onClick={() => setMobileOpen(false)}
+      className={`
+        flex items-center gap-4 p-3 rounded-xl transition-all duration-200 font-medium group whitespace-nowrap
+        ${isActive 
+          ? "bg-sky-600 text-white shadow-md shadow-sky-900/20" 
+          : "text-slate-400 hover:bg-slate-800 hover:text-white"}
+        ${collapsed ? "justify-center" : ""}
+      `}
+    >
+      <span className="text-xl">{item.icon}</span>
+      {!collapsed && <span>{item.name}</span>}
+    </Link>
+  );
+})}
+
         </nav>
 
         {/* 3. FOOTER (Logout - Always at bottom) */}

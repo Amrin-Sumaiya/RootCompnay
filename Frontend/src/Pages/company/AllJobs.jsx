@@ -37,7 +37,7 @@ const AllJobs = () => {
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/company/all-jobs");
+      const res = await axios.get("http://localhost:5000/api/jobs/all-jobs");
       setJobs(res.data);
     } catch (err) {
       console.error(err);
@@ -97,82 +97,93 @@ const AllJobs = () => {
 
         <div className="flex flex-col lg:flex-row gap-8">
             
-            {/* --- LEFT SIDEBAR (The Design from your image) --- */}
-            <aside className="w-full lg:w-1/4 space-y-6">
+            {/* --- LEFT SIDEBAR (Updated with Shadow Bar Design) --- */}
+            <aside className="w-full lg:w-1/4">
                 
-                {/* Search Box within Sidebar */}
-                <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <SearchIcon />
+                {/* UPDATED: Wrapped the entire sidebar content in a single container 
+                    with bg-white, shadow-xl, and rounded-xl to create the "Shadow Bar" look.
+                */}
+                <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-200 space-y-6">
+
+                    {/* Search Box within Sidebar */}
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-1">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <SearchIcon />
+                            </div>
+                            <input
+                                type="text"
+                                className="block w-full pl-10 pr-3 py-2 bg-transparent rounded-md leading-5 placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-sm"
+                                placeholder="Search for Jobs..."
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setCurrentPage(1); // Reset to page 1 on search
+                                }}
+                            />
                         </div>
-                        <input
-                            type="text"
-                            className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-md leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 sm:text-sm"
-                            placeholder="Search for Jobs..."
-                            value={searchTerm}
-                            onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                setCurrentPage(1); // Reset to page 1 on search
-                            }}
-                        />
                     </div>
+
+                    {/* Quick Filter Header */}
+                    <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                        <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                            <div className="bg-green-900 p-1 rounded text-white"><FilterIcon /></div> 
+                            Quick Filter
+                        </h3>
+                        <button className="text-green-900 hover:underline text-xs" onClick={() => {setSearchTerm(""); setCurrentPage(1)}}>Clear</button>
+                    </div>
+
+                    {/* Salary Range */}
+                    <div className="space-y-3">
+                        <div className="flex justify-between text-sm font-medium text-slate-700">
+                            <span>Salary Range</span>
+                        </div>
+                        <input type="range" className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-900" />
+                        <div className="flex justify-between text-xs text-gray-500">
+                            <span>$0</span>
+                            <span>$10k+</span>
+                        </div>
+                    </div>
+
+                    {/* Experience Range */}
+                    <div className="space-y-3 pt-2">
+                         <div className="flex justify-between text-sm font-medium text-slate-700">
+                            <span>Experience</span>
+                        </div>
+                        <input type="range" className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-900" />
+                         <div className="flex justify-between text-xs text-gray-500">
+                            <span>0 yr</span>
+                            <span>10 yr+</span>
+                        </div>
+                    </div>
+
+                    {/* Checkbox Filters */}
+                    <div className="pt-2">
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" className="form-checkbox text-green-900 rounded border-gray-300 h-4 w-4" />
+                            <span className="text-sm text-gray-600">Fresher</span>
+                        </label>
+                    </div>
+
+                    {/* Accordion Filters */}
+                    <div className="space-y-2">
+                        {['Category/Industry', 'Location', 'Posted/Deadline', 'Other Filters'].map((filter, idx) => (
+                            <div key={idx} className="border-t border-gray-100 py-3 first:border-t-0">
+                                <button className="flex justify-between items-center w-full text-left group">
+                                    <span className="text-sm font-medium text-slate-700 group-hover:text-green-900 transition-colors">{filter}</span>
+                                    <span className="text-gray-400 group-hover:text-green-900"><ChevronDown /></span>
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                     <button className="w-full mt-2 bg-gray-50 border border-green-900 text-green-900 font-medium py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-all shadow-sm">
+                        Clear All Filters
+                     </button>
+
                 </div>
+                {/* End of Shadow Bar Container */}
 
-                {/* Quick Filter Header */}
-                <div className="flex items-center justify-between pb-2 border-b border-gray-800">
-                    <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                        <div className="bg-green-900 p-1 rounded text-white"><FilterIcon /></div> 
-                        Quick Filter
-                    </h3>
-                    <button className="text-green-900 hover:underline text-xs" onClick={() => {setSearchTerm(""); setCurrentPage(1)}}>Clear</button>
-                </div>
-
-                {/* Salary Range (Visual Only - Visuals from image) */}
-                <div className="space-y-3">
-                    <div className="flex justify-between text-sm font-medium text-slate-700">
-                        <span>Salary Range</span>
-                    </div>
-                    <input type="range" className="w-full h-2 bg-red-300 rounded-lg appearance-none cursor-pointer accent-green-900" />
-                    <div className="flex justify-between text-xs text-gray-500">
-                        <span>$0</span>
-                        <span>$10k+</span>
-                    </div>
-                </div>
-
-                {/* Experience Range (Visual Only) */}
-                <div className="space-y-3 pt-4">
-                     <div className="flex justify-between text-sm font-medium text-slate-700">
-                        <span>Experience</span>
-                    </div>
-                    <input type="range" className="w-full h-2 bg-red-300 rounded-lg appearance-none cursor-pointer accent-green-900" />
-                     <div className="flex justify-between text-xs text-gray-500">
-                        <span>0 yr</span>
-                        <span>10 yr+</span>
-                    </div>
-                </div>
-
-                {/* Checkbox Filters */}
-                <div className="pt-2">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" className="form-checkbox text-green-900 rounded border-gray-300 h-4 w-4" />
-                        <span className="text-sm text-gray-600">Fresher</span>
-                    </label>
-                </div>
-
-                {/* Accordion Filters */}
-                {['Category/Industry', 'Location', 'Posted/Deadline', 'Other Filters'].map((filter, idx) => (
-                    <div key={idx} className="border-t border-gray-100 py-3">
-                        <button className="flex justify-between items-center w-full text-left group">
-                            <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600">{filter}</span>
-                            <span className="text-gray-400"><ChevronDown /></span>
-                        </button>
-                    </div>
-                ))}
-
-                 <button className="w-full mt-4 border border-green-900 text-green-900 font-medium py-2 rounded-lg hover:bg-blue-50 transition-colors">
-                    Clear All Filters
-                 </button>
             </aside>
 
 
@@ -188,17 +199,20 @@ const AllJobs = () => {
                          <p className="text-gray-500 mt-2">Try adjusting your search terms.</p>
                     </div>
                 ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-3">
                         {currentJobs.map((job) => {
                             // --- SAFETY LOGIC ---
-                            const safeCompanyUrl = job.Company_URL ? job.Company_URL.replace(/^\/+/, "").trim() : null;
+if (!job.Company_URL) return null;
+
+const safeCompanyUrl = job.Company_URL.replace(/^\/+/, "").trim();
+
                             const safeCompanyName = (job.CompanyName || "Company").replace("/", "");
 
                             return (
                                 <div key={job.JobID} className="group flex flex-col md:flex-row bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-lg hover:border-blue-200 transition-all duration-300">
                                     
                                     {/* Job Content */}
-                                    <div className="flex-1 pr-0 md:pr-6">
+                                    <div className="flex-1 pr-0 md:pr-6 ">
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <Link 
@@ -245,15 +259,7 @@ const AllJobs = () => {
 
                                     {/* Action Button */}
                                     <div className="mt-4 md:mt-0 md:w-48 flex flex-col justify-center border-t md:border-t-0 md:border-l border-gray-100 pt-4 md:pt-0 md:pl-6">
-                                        <button
-                                            onClick={() => {
-                                                setSelectedJob(job);
-                                                setShowModal(true);
-                                            }}
-                                            className="w-full bg-white border border-green-600 text-green-900 font-semibold py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200 text-sm mb-2"
-                                        >
-                                            View Details
-                                        </button>
+
                                         <button 
                                             onClick={() => {
                                                 setSelectedJob(job);

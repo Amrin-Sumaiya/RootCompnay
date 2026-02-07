@@ -1,13 +1,29 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import html2pdf from 'html2pdf.js';
+import api from "../api/axios";
 
-const MakingCV = () => {
+const DEGREE_SEQUENCE = ['PSC', 'JSC', 'SSC', 'HSC', 'BSc', 'MSc', 'PhD'];
+
+function MakingCV() {
   const cvRef = useRef(null);
-   const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  // State for raw data from APIs
+  const [allSchoolData, setAllSchoolData] = useState([]);
+  const [publicUniData, setPublicUniData] = useState([]);
+  const [privateUniData, setPrivateUniData] = useState([]);
+  
+  // Selection state for Public/Private toggle
+  const [uniType, setUniType] = useState('public');
+
+  const [divisions, setDivisions] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [courseOptions, setCourseOptions] = useState([]);
+
+  const [upazilas, setUpazilas] = useState([]);
 
   const [formData, setFormData] = useState({
-    // Personal
     fullName: '',
     profession: '',
     address: '',
@@ -15,340 +31,585 @@ const MakingCV = () => {
     email: '',
     fatherName: '',
     motherName: '',
-    
-    // Education
-    degree: '',
-    university: '',
-    passingYear: '',
-    cgpa: '',
-
-    // Experience
+    division: '',
+    district: '',
+    upazila: '',
+    education: [{ institute: '', degree: '', passingYear: '' }],
     company: '',
     jobTitle: '',
     duration: '',
     description: '',
+    skills: '',
+    professionalCourses: []
 
-    // Skills
-    skills: ''
   });
+
+  //fetc h course options
+  useEffect(() => {
+  const fetchCourses = async () => {
+    try {
+      const res = await api.get('/common/professional-courses');
+      setCourseOptions(res.data);
+    } catch (err) {
+      console.error('Failed to fetch courses', err);
+    }
+  };
+  fetchCourses();
+}, []);
+
+
+  // Fetch all institution data from your provided HTTP endpoints
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch Schools & Colleges
+        const schoolRes = await fetch('http://bd-institution-data.solutya.com/data/bd_schoolName_data.json');
+        const schoolData = await schoolRes.json();
+        setAllSchoolData(Array.isArray(schoolData) ? schoolData : []);
+
+        // Fetch Public Universities
+        const publicRes = await fetch('http://bd-institution-data.solutya.com/data/public_Uni_data.json');
+        const publicData = await publicRes.json();
+        setPublicUniData(Array.isArray(publicData) ? publicData : []);
+
+        // Fetch Private Universities
+        const privateRes = await fetch('http://bd-institution-data.solutya.com/data/private_Uni_data.json');
+        const privateData = await privateRes.json();
+        setPrivateUniData(Array.isArray(privateData) ? privateData : []);
+
+      } catch (err) {
+        console.error("Failed to fetch institution data. Note: Browser may block HTTP on HTTPS sites.", err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  //professional course handlers
+  const handleCourseChange = (e) => {
+  const selected = Array.from(e.target.selectedOptions).map(
+    opt => opt.value
+  );
+
+  setFormData(prev => ({
+    ...prev,
+    professionalCourses: selected
+  }));
+};
+
+
+  // Education Helpers based on your specific requirements
+  const getAllowedDegrees = (index) => {
+    if (index === 0) return DEGREE_SEQUENCE;
+    const prevDegree = formData.education[index - 1]?.degree;
+    const prevIndex = DEGREE_SEQUENCE.indexOf(prevDegree);
+    return prevIndex >= 0 ? DEGREE_SEQUENCE.slice(prevIndex + 1) : [];
+  };
+
+  const getInstitutesByDegree = (degree) => {
+    if (!degree) return [];
+    // PSC, JSC, SSC, HSC use the school/college API
+    if (['PSC', 'JSC', 'SSC', 'HSC'].includes(degree)) {
+      return allSchoolData.map(item => item.name || item);
+    }
+    // BSc, MSc, PhD use University APIs based on current uniType selection
+    if (['BSc', 'MSc', 'PhD'].includes(degree)) {
+      const targetData = uniType === 'public' ? publicUniData : privateUniData;
+      return targetData.map(item => item.name || item);
+    }
+    return [];
+  };
+
+  const handleEducationChange = (index, e) => {
+    const { name, value } = e.target;
+    const updated = [...formData.education];
+    updated[index][name] = value;
+
+    if (name === 'degree') {
+      updated[index].institute = '';
+    }
+    setFormData(prev => ({ ...prev, education: updated }));
+  };
+
+  const addEducation = () => {
+    const lastEdu = formData.education[formData.education.length - 1];
+    if (!lastEdu.degree) return alert('Please select a degree first');
+    
+    setFormData(prev => ({
+      ...prev,
+      education: [...prev.education, { institute: '', degree: '', passingYear: '' }]
+    }));
+  };
+
+  const removeEducation = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      education: prev.education.filter((_, i) => i !== index)
+    }));
+  };
+
+//professional course
+const getCourseNameById = (id) =>
+  courseOptions.find(c => String(c.id) === String(id))?.name || '';
+
+
+  // Helper function to format number
+  const formatBDNumber = (value) => {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length <= 5) return digits;
+    if (digits.length <= 8) return `${digits.slice(0, 5)} ${digits.slice(5)}`;
+    return `${digits.slice(0, 5)} ${digits.slice(5, 8)} ${digits.slice(8, 11)}`;
+  };
+
+  const getDivisionName = () => divisions.find(d => d.id === formData.division)?.name || '';
+  const getDistrictName = () => districts.find(d => d.id === formData.district)?.name || '';
+
+  // Location Logic
+  useEffect(() => {
+    fetch('https://bdapi.vercel.app/api/v.1/division')
+      .then(res => res.json())
+      .then(data => setDivisions(data.data || []))
+      .catch(err => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    if (formData.division) {
+      fetch(`https://bdapi.vercel.app/api/v.1/district/${formData.division}`)
+        .then(res => res.json())
+        .then(data => {
+          setDistricts(data.data || []);
+          setFormData(prev => ({ ...prev, district: '', upazila: '' }));
+        });
+    }
+  }, [formData.division]);
+
+  useEffect(() => {
+    if (formData.district) {
+      fetch(`https://bdapi.vercel.app/api/v.1/district/${formData.district}`)
+        .then(res => res.json())
+        .then(data => {
+          // eslint-disable-next-line no-undef
+          setUpazilas(data.data || []);
+          setFormData(prev => ({ ...prev, upazila: '' }));
+        });
+    }
+  }, [formData.district]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'phone') {
+      const formattedValue = formatBDNumber(value);
+      if (formattedValue.length <= 13) {
+        setFormData(prev => ({ ...prev, [name]: formattedValue }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleDownload = () => {
     const element = cvRef.current;
     const opt = {
-      margin:       0,
-      filename:     'my_cv.pdf',
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true }, 
-      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      margin: 0,
+      filename: 'my_cv.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
-
     html2pdf().set(opt).from(element).save();
   };
-  const handleBack = () => {
-  navigate("/candidateslogin");
-};
 
+  const handleSave = async () => {
+    try {
+      await api.post('/candidate/profile', formData, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      alert('Profile saved successfully ✅');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to save profile');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col">
-      
-      {/* --- Navbar (Glassmorphism) --- */}
       <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2 ">
-
-                <button
-    onClick={handleBack}
-    className="flex items-center gap-3 bg-gray-300  rounded-full px-4 py-2 text-sm font-medium text-slate-900 hover:text-emerald-600 transition "
-  >
-    ← Back
-  </button>
+              <button onClick={() => navigate("/candidateslogin")} className="flex items-center gap-3 bg-gray-300 rounded-full px-4 py-2 text-sm font-medium text-slate-900 hover:text-emerald-600 transition ">← Back</button>
               <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">C</div>
-              <h1 className="text-xl font-bold bg-linear-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-                CV Builder
-              </h1>
+              <h1 className="text-xl font-bold bg-linear-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">CV Builder</h1>
             </div>
-            <button 
-              onClick={handleDownload}
-              className="group bg-slate-900 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 shadow-lg shadow-slate-900/20 hover:shadow-emerald-600/30 flex items-center gap-2"
-            >
-              <span className="group-hover:-translate-y-0.5 transition-transform duration-200">⬇</span> 
-              Download PDF
-            </button>
+            <div className="flex gap-3">
+              <button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium">💾 Save</button>
+              <button onClick={handleDownload} className="bg-slate-900 hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium">⬇ Download PDF</button>
+            </div>
           </div>
         </div>
       </nav>
 
       <main className="grow max-w-7xl mx-auto w-full p-4 lg:p-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
-          
-          {/* --- LEFT SIDE: EDITOR (Scrollable Dashboard) --- */}
-          <div className="lg:col-span-5 h-[calc(100vh-140px)] overflow-y-auto pr-2 custom-scrollbar space-y-6 pb-10">
-            
-            {/* Instruction Banner */}
+          <div className="lg:col-span-5 pr-2 space-y-6 pb-10">
             <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex gap-3 items-start">
               <span className="text-xl">✍️</span>
               <div>
                 <h3 className="font-bold text-blue-900 text-sm">Editor Mode</h3>
-                <p className="text-blue-700 text-xs">Fill in the details below. The preview on the right updates automatically.</p>
+                <p className="text-blue-700 text-xs">Fill in the details below.</p>
               </div>
             </div>
 
-            {/* Personal Details Card */}
-            <section className="bg-white p-6 rounded-xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100 transition hover:shadow-lg">
+            {/* Personal Details Section */}
+            <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 transition hover:shadow-lg">
               <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
                 <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">👤</div>
                 <h2 className="text-lg font-bold text-slate-800">Personal Details</h2>
               </div>
-              
               <div className="grid grid-cols-2 gap-5">
                 <div className="col-span-2">
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>
-                  <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all duration-200 placeholder:text-slate-400 font-medium" 
-                    placeholder="e.g. Sultan Ahmed" />
+                  <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all duration-200" placeholder="e.g. Sultan Ahmed" />
                 </div>
                 <div className="col-span-2">
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Current Profession</label>
-                  <input type="text" name="profession" value={formData.profession} onChange={handleChange} 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all duration-200" 
-                    placeholder="e.g. MERN Stack Developer" />
+                  <input type="text" name="profession" value={formData.profession} onChange={handleChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all duration-200" placeholder="e.g. MERN Stack Developer" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Father's Name</label>
-                  <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange} 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" />
+                  <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mother's Name</label>
-                  <input type="text" name="motherName" value={formData.motherName} onChange={handleChange} 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" />
+                  <input type="text" name="motherName" value={formData.motherName} onChange={handleChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mobile</label>
+                  <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500 transition-all">
+                    <div className="flex items-center gap-2 px-3 py-2.5 border-r border-slate-200 bg-slate-100">
+                      <span className="text-lg leading-none">🇧🇩</span>
+                      <span className="text-slate-400">▼</span>
+                    </div>
+                    <input
+                      type="text"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="grow px-4 py-2.5 bg-transparent outline-none placeholder:text-slate-300"
+                      placeholder="01873 920 873" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">E-mail</label>
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Phone</label>
-                  <input type="text" name="phone" value={formData.phone} onChange={handleChange} 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" />
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Division</label>
+                  <select name="division" value={formData.division} onChange={handleChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all">
+                    <option value="">Select Division</option>
+                    {divisions.map((div) => (<option key={div.id} value={div.id}>{div.name}</option>))}
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Email</label>
-                  <input type="email" name="email" value={formData.email} onChange={handleChange} 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" />
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">District</label>
+                  <select name="district" value={formData.district} onChange={handleChange} disabled={!formData.division} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all">
+                    <option value="">Select District</option>
+                    {districts.map((dis) => (<option key={dis.id} value={dis.id}>{dis.name}</option>))}
+                  </select>
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Address</label>
-                  <textarea name="address" value={formData.address} onChange={handleChange} rows="2"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none"></textarea>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Village / Road Address</label>
+                  <textarea name="address" value={formData.address} onChange={handleChange} rows="2" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none"></textarea>
                 </div>
               </div>
             </section>
 
-            {/* Education Card */}
-            <section className="bg-white p-6 rounded-xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100 transition hover:shadow-lg">
-              <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
-                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">🎓</div>
-                <h2 className="text-lg font-bold text-slate-800">Education</h2>
-              </div>
-              <div className="grid grid-cols-2 gap-5">
-                <div className="col-span-2">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Institute / University</label>
-                  <input type="text" name="university" value={formData.university} onChange={handleChange} 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Degree</label>
-                  <input type="text" name="degree" value={formData.degree} onChange={handleChange} 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Passing Year</label>
-                  <input type="text" name="passingYear" value={formData.passingYear} onChange={handleChange} 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" />
-                </div>
-              </div>
-            </section>
+            {/* Education Section */}
+      <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+  <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+    <div className="flex items-center gap-2">
+      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">🎓</div>
+      <h2 className="text-lg font-bold text-slate-800">Education</h2>
+    </div>
+    <button 
+      onClick={addEducation} 
+      className="bg-blue-600 hover:bg-blue-700 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-sm transition-transform active:scale-95"
+    >
+      +
+    </button>
+  </div>
 
-            {/* Experience Card */}
-            <section className="bg-white p-6 rounded-xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100 transition hover:shadow-lg">
+  <div className="space-y-6">
+    {formData.education.map((edu, index) => {
+      const allowedDegrees = getAllowedDegrees(index);
+      const isUniDegree = ['BSc', 'MSc', 'PhD'].includes(edu.degree);
+      const instituteList = getInstitutesByDegree(edu.degree);
+
+      return (
+        <div key={index} className="relative p-5 bg-slate-50 rounded-xl border border-slate-200 transition-all hover:border-blue-200 hover:shadow-md group">
+          {formData.education.length > 1 && (
+            <button 
+              onClick={() => removeEducation(index)} 
+              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full text-[10px] flex items-center justify-center shadow-md z-10"
+            >
+              ✕
+            </button>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Degree Selection */}
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Degree</label>
+              <select 
+                name="degree" 
+                value={edu.degree} 
+                onChange={(e) => handleEducationChange(index, e)} 
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm"
+              >
+                <option value="">Select Degree</option>
+                {allowedDegrees.map(d => (<option key={d} value={d}>{d}</option>))}
+              </select>
+            </div>
+
+            {/* Passing Year */}
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Passing Year</label>
+              <input 
+                type="text" 
+                name="passingYear" 
+                placeholder="YYYY"
+                value={edu.passingYear} 
+                onChange={(e) => handleEducationChange(index, e)} 
+                className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm" 
+              />
+            </div>
+
+            {/* University Type Toggle (Conditional) */}
+            {isUniDegree && (
+              <div className="md:col-span-2">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">University Type</label>
+                <div className="flex gap-2 p-1.5 bg-white border border-slate-200 rounded-lg w-fit">
+                  <button
+                    type="button"
+                    onClick={() => { setUniType('public'); handleEducationChange(index, {target: {name: 'institute', value: ''}}); }}
+                    className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${uniType === 'public' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                  >
+                    Public
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setUniType('private'); handleEducationChange(index, {target: {name: 'institute', value: ''}}); }}
+                    className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${uniType === 'private' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
+                  >
+                    Private
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Institute Selection */}
+            <div className="md:col-span-2">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Institute</label>
+              <select 
+                name="institute" 
+                value={edu.institute} 
+                disabled={!edu.degree} 
+                onChange={(e) => handleEducationChange(index, e)} 
+                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm ${!edu.degree ? 'bg-slate-100 cursor-not-allowed border-slate-200' : 'bg-white border-slate-200'}`}
+              >
+                <option value="">Select Institute</option>
+                {instituteList.map((name, i) => (<option key={i} value={name}>{name}</option>))}
+              </select>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</section>
+
+            {/* Experience Section */}
+            <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
               <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
                 <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">💼</div>
                 <h2 className="text-lg font-bold text-slate-800">Experience</h2>
               </div>
               <div className="space-y-5">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Company Name</label>
-                  <input type="text" name="company" value={formData.company} onChange={handleChange} 
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all" />
-                </div>
+                <input type="text" name="company" value={formData.company} onChange={handleChange} placeholder="Company Name" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg" />
                 <div className="grid grid-cols-2 gap-5">
-                    <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Job Title</label>
-                    <input type="text" name="jobTitle" value={formData.jobTitle} onChange={handleChange} 
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all" />
-                    </div>
-                    <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Duration</label>
-                    <input type="text" name="duration" value={formData.duration} onChange={handleChange} 
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all" />
-                    </div>
+                  <input type="text" name="jobTitle" value={formData.jobTitle} onChange={handleChange} placeholder="Job Title" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg" />
+                  <input type="text" name="duration" value={formData.duration} onChange={handleChange} placeholder="Duration" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg" />
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Job Description</label>
-                  <textarea name="description" value={formData.description} onChange={handleChange} rows="4"
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none transition-all resize-none"></textarea>
-                </div>
+                <textarea name="description" value={formData.description} onChange={handleChange} rows="4" placeholder="Description" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg resize-none"></textarea>
               </div>
             </section>
 
-             {/* Skills Card */}
-             <section className="bg-white p-6 rounded-xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100 transition hover:shadow-lg">
+            {/* Skills Section */}
+            <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
               <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
                 <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">⚡</div>
                 <h2 className="text-lg font-bold text-slate-800">Skills</h2>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">List your skills (comma separated)</label>
-                <textarea name="skills" value={formData.skills} onChange={handleChange} rows="3" placeholder="React, Node.js, Photoshop, Team Leadership..."
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all"></textarea>
-              </div>
+              <textarea name="skills" value={formData.skills} onChange={handleChange} rows="3" placeholder="React, Node.js, Photoshop..." className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg"></textarea>
             </section>
 
-            {/* Footer Credit */}
-            <div className="text-center text-slate-400 text-xs py-4">
-              Designed for professional CV creation
-            </div>
+            {/* Professional Course Section */}
+{/* Professional Course Section */}
+<section className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+  <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">🎯</div>
+    <h2 className="text-lg font-bold text-slate-800">Professional Courses</h2>
+  </div>
+
+  {/* NEW: Professional Toggle Grid */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
+    {courseOptions.map((course) => {
+      const isSelected = formData.professionalCourses.includes(String(course.id));
+      return (
+        <button
+          key={course.id}
+          onClick={() => {
+            const idStr = String(course.id);
+            setFormData(prev => ({
+              ...prev,
+              professionalCourses: isSelected
+                ? prev.professionalCourses.filter(id => id !== idStr)
+                : [...prev.professionalCourses, idStr]
+            }));
+          }}
+          className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all duration-200 text-left ${
+            isSelected 
+              ? "border-emerald-500 bg-emerald-50 text-emerald-900 shadow-sm" 
+              : "border-slate-100 bg-slate-50 text-slate-600 hover:border-slate-300"
+          }`}
+        >
+          <span className="text-xs font-bold uppercase tracking-tight">{course.name}</span>
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 transition-colors ${
+            isSelected ? "bg-emerald-500 border-emerald-500" : "bg-white border-slate-200"
+          }`}>
+            {isSelected && (
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+          </div>
+        </button>
+      );
+    })}
+  </div>
+  
+  <p className="text-[10px] text-slate-400 mt-4 italic">
+    Click on the certificates you have earned to include them in your CV.
+  </p>
+</section>
           </div>
 
-          {/* --- RIGHT SIDE: PREVIEW AREA (Dark Mode Studio Look) --- */}
-          <div className="lg:col-span-7 bg-slate-800 rounded-3xl overflow-hidden flex flex-col relative shadow-inner">
-            
-            {/* Dot Pattern Overlay */}
-            <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
-            
-            {/* Header for Preview */}
+          {/* Preview Section */}
+          <div className="lg:col-span-7 bg-slate-800 rounded-3xl overflow-hidden flex flex-col shadow-inner h-fit sticky top-20">
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
             <div className="bg-slate-900/50 backdrop-blur-sm p-3 flex justify-between items-center text-slate-400 text-xs px-6 border-b border-slate-700/50 z-10">
               <span className="font-mono">LIVE PREVIEW</span>
               <span className="bg-slate-700 px-2 py-0.5 rounded text-white">A4 Size</span>
             </div>
-
-            {/* Scrollable Container for Paper */}
-            <div className="grow overflow-y-auto p-8 flex justify-center items-start custom-scrollbar z-10">
-              
-              {/* A4 Paper - Strict Hex Colors for PDF Safety 
-                 Note: w-[210mm] is exactly A4 width. 
-              */}
+            <div className="grow overflow-y-auto p-8 flex justify-center items-start z-10">
               <div ref={cvRef} className="bg-[#ffffff] w-[210mm] min-h-[297mm] shadow-[0_0_50px_rgba(0,0,0,0.25)] p-10 text-[#333333] transform scale-95 origin-top lg:scale-100 transition-transform">
-                
-                {/* CV Header */}
                 <div className="border-b-2 border-[#333333] pb-6 mb-8 flex flex-col justify-between h-auto">
                   <div>
-                    <h1 className="text-5xl font-extrabold uppercase tracking-tight mb-2 text-[#000000] leading-tight">
-                      {formData.fullName || 'YOUR NAME'}
-                    </h1>
-                    <p className="text-2xl text-[#1029b9] font-medium tracking-wide">
-                      {formData.profession || 'Professional Title'}
-                    </p>
+                    <h1 className="text-5xl font-extrabold uppercase tracking-tight mb-2 text-[#000000] leading-tight">{formData.fullName || 'YOUR NAME'}</h1>
+                    <p className="text-2xl text-[#1029b9] font-medium tracking-wide">{formData.profession || 'Professional Title'}</p>
                   </div>
-                  
                   <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-[#555555]">
                     {formData.phone && <span className="flex items-center gap-1">📞 {formData.phone}</span>}
                     {formData.email && <span className="flex items-center gap-1">📧 {formData.email}</span>}
-                    {formData.address && <span className="flex items-center gap-1">📍 {formData.address}</span>}
+                    {(formData.district || formData.division) && (
+                      <span className="flex items-center gap-1">
+                        📍 {formData.address && `${formData.address}, `}
+                        {getDistrictName() && `${getDistrictName()}, `}
+                        {getDivisionName()}
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-12 gap-10">
-                  
-                  {/* Main Left Column */}
                   <div className="col-span-8 space-y-10">
-                    
-                    {/* Experience Section */}
                     <div>
                       <h3 className="text-lg font-bold uppercase border-b-2 border-[#e5e5e5] pb-2 mb-5 text-[#000000] tracking-wider">Experience</h3>
                       {formData.company ? (
-                          <div className="mb-6 group">
-                              <div className="flex justify-between items-baseline mb-1">
-                                <h4 className="font-bold text-xl text-[#000000]">{formData.jobTitle}</h4>
-                                <span className="text-[#1037b9] font-bold text-xs bg-[#ecfdf5] px-2 py-1 rounded">{formData.duration}</span>
-                              </div>
-                              <div className="text-[#666666] font-semibold text-sm mb-3">{formData.company}</div>
-                              <p className="text-[#444444] leading-relaxed text-sm whitespace-pre-wrap text-justify">
-                                {formData.description}
-                              </p>
+                        <div className="mb-6 group">
+                          <div className="flex justify-between items-baseline mb-1">
+                            <h4 className="font-bold text-xl text-[#000000]">{formData.jobTitle}</h4>
+                            <span className="text-[#1037b9] font-bold text-xs bg-[#ecfdf5] px-2 py-1 rounded">{formData.duration}</span>
                           </div>
+                          <div className="text-[#666666] font-semibold text-sm mb-3">{formData.company}</div>
+                          <p className="text-[#444444] leading-relaxed text-sm whitespace-pre-wrap text-justify">{formData.description}</p>
+                        </div>
                       ) : (
-                          <div className="p-4 border border-dashed border-[#cccccc] rounded bg-[#f9f9f9] text-[#aaaaaa] italic text-sm text-center">
-                            Start typing in the Experience section to see changes here...
-                          </div>
+                        <div className="p-4 border border-dashed border-[#cccccc] rounded bg-[#f9f9f9] text-[#aaaaaa] italic text-sm text-center">Experience details...</div>
                       )}
                     </div>
-
-                    {/* Education Section */}
                     <div>
                       <h3 className="text-lg font-bold uppercase border-b-2 border-[#e5e5e5] pb-2 mb-5 text-[#000000] tracking-wider">Education</h3>
-                      {formData.university ? (
-                          <div className="flex flex-col gap-1">
-                              <h4 className="font-bold text-lg text-[#000000]">{formData.degree}</h4>
-                              <p className="text-[#333333] font-medium text-base">{formData.university}</p>
-                              <p className="text-sm text-[#666666]">Graduated: {formData.passingYear}</p>
+                      {formData.education.some(e => e.institute) ? (
+                        formData.education.map((edu, i) => (
+                          <div key={i} className="flex flex-col gap-1 mb-4">
+                            <h4 className="font-bold text-lg text-[#000000]">{edu.degree}</h4>
+                            <p className="text-[#333333] font-medium text-base">{edu.institute}</p>
+                            <p className="text-sm text-[#666666]">Graduated: {edu.passingYear}</p>
                           </div>
+                        ))
                       ) : (
-                          <p className="text-[#aaaaaa] italic text-sm">Add education details...</p>
+                        <p className="text-[#aaaaaa] italic text-sm">Add education details...</p>
                       )}
                     </div>
                   </div>
 
-                  {/* Right Sidebar Column */}
                   <div className="col-span-4 flex flex-col gap-8">
-                    
-                    {/* Personal Info Box */}
                     <div className="bg-[#f8fafc] p-5 rounded-xl border border-[#e2e8f0]">
-                      <h3 className="text-sm font-bold uppercase border-b-2 border-[#10b981] pb-2 mb-4 text-[#000000] tracking-wide">
-                        Personal Info
-                      </h3>
+                      <h3 className="text-sm font-bold uppercase border-b-2 border-[#10b981] pb-2 mb-4 text-[#000000] tracking-wide">Personal Info</h3>
                       <div className="space-y-4 text-sm">
-                          <div>
-                              <span className="block font-bold text-[#94a3b8] text-[10px] uppercase tracking-wider mb-1">Father's Name</span>
-                              <span className="text-[#1e293b] font-semibold">{formData.fatherName || '-'}</span>
-                          </div>
-                          <div>
-                              <span className="block font-bold text-[#94a3b8] text-[10px] uppercase tracking-wider mb-1">Mother's Name</span>
-                              <span className="text-[#1e293b] font-semibold">{formData.motherName || '-'}</span>
-                          </div>
+                        <div>
+                          <span className="block font-bold text-[#94a3b8] text-[10px] uppercase mb-1">Father's Name</span>
+                          <span className="text-[#1e293b] font-semibold">{formData.fatherName || '-'}</span>
+                        </div>
+                        <div>
+                          <span className="block font-bold text-[#94a3b8] text-[10px] uppercase mb-1">Mother's Name</span>
+                          <span className="text-[#1e293b] font-semibold">{formData.motherName || '-'}</span>
+                        </div>
                       </div>
                     </div>
-
-                    {/* Skills Box */}
                     <div>
-                      <h3 className="text-sm font-bold uppercase border-b-2 border-[#10b981] pb-2 mb-4 text-[#000000] tracking-wide">
-                        Expertise
-                      </h3>
+                      <h3 className="text-sm font-bold uppercase border-b-2 border-[#10b981] pb-2 mb-4 text-[#000000] tracking-wide">Expertise</h3>
                       <div className="flex flex-wrap gap-2">
-                          {formData.skills ? formData.skills.split(',').map((skill, i) => (
-                               <span key={i} className="bg-[#d1fae5] text-[#065f46] px-3 py-1.5 rounded-lg text-xs font-bold border border-[#a7f3d0]">
-                                 {skill.trim()}
-                               </span>
-                          )) : (
-                              <span className="text-[#aaaaaa] text-sm italic">No skills yet</span>
-                          )}
+                        {formData.skills ? formData.skills.split(',').map((skill, i) => (
+                          <span key={i} className="bg-[#d1fae5] text-[#065f46] px-3 py-1.5 rounded-lg text-xs font-bold border border-[#a7f3d0]">{skill.trim()}</span>
+                        )) : (<span className="text-[#aaaaaa] text-sm italic">No skills yet</span>)}
                       </div>
                     </div>
+                    <div>
+                      <h3 className="text-sm font-bold uppercase border-b-2 border-[#10b981] pb-2 mb-4 text-[#000000] tracking-wide">Professional Course</h3>
+                      <div className="flex flex-wrap gap-2">
+{formData.professionalCourses.map((courseId, i) => (
+  <span
+    key={i}
+    className="bg-[#eff6ff] text-[#1e40af] px-3 py-1.5 rounded-lg text-xs font-bold border border-[#dbeafe]"
+  >
+    {getCourseNameById(courseId)}
+  </span>
+))}
 
+
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
       </main>
     </div>
-  )
+  );
 }
 
-export default MakingCV
+export default MakingCV;

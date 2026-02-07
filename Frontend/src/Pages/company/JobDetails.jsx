@@ -26,7 +26,7 @@ const JobDetails = () => {
         // Clean the companyUrl in case of double slashes logic
         const cleanCompanyUrl = companyUrl.replace(/^\//, "");
         const res = await axios.get(
-          `http://localhost:5000/api/company/public/${cleanCompanyUrl}/${jobSlug}`
+          `http://localhost:5000/api/jobs/public/${cleanCompanyUrl}/${jobSlug}`
         );
         setJob(res.data);
       } catch (err) {

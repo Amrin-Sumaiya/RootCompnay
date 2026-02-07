@@ -20,16 +20,23 @@ const Read = () => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [editData, setEditData] = useState({
     CompanyName: '',
-    CompanyCode: '',
+  
     Company_URL: '',
     FoundedDate: '',
+    email: '',
+password: ''
+
   });
 
   const fetchCompanies = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/igl/get_company');
-      setCompanies(Array.isArray(res.data.data) ? res.data.data : []);
+      const res = await axios.get('http://localhost:5000/api/admin/companies' , {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem("token")}`
+  }
+});
+      setCompanies(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -45,7 +52,7 @@ const Read = () => {
     setSelectedCompany(company);
     setEditData({
       CompanyName: company.CompanyName,
-      CompanyCode: company.CompanyCode,
+     
       Company_URL: company.Company_URL || '',
       FoundedDate: company.FoundedDate
         ? new Date(company.FoundedDate).toISOString().split('T')[0]
@@ -109,16 +116,8 @@ const Read = () => {
         </div>
       )
     },
-    {
-      header: 'Code',
-      accessorKey: 'CompanyCode',
-      cell: (info) => <span className="px-2 py-1 bg-gray-100 rounded text-xs font-mono font-medium">{info.getValue()}</span>
-    },
-    {
-      header: 'Type',
-      accessorKey: 'CompanyType',
-      cell: (info) => info.getValue() || <span className="text-gray-400 italic text-sm">N/A</span>
-    },
+
+
     {
       header: 'Company URL',
       accessorKey: 'Company_URL',
@@ -215,7 +214,7 @@ const Read = () => {
                 </div>
 
                 <Link 
-                    to="/" 
+                    to="/admin/dashboard" 
                     className="w-full md:w-auto px-6 py-2.5 bg-gray-800 text-white font-medium rounded-xl hover:bg-gray-900 transition-all shadow-lg shadow-gray-200 text-center"
                 >
                     Dashboard
