@@ -14,6 +14,7 @@ import CandidatesLogin from "./Pages/CandidatesLogin.jsx";
 
 // ================= CANDIDATE PAGE =================
 import Making from "./Pages/makingcv.jsx";
+import MyProfile from "./Pages/MyProfile.jsx";
 
 // ================= ROOT DASHBOARD =================
 import AdminLayout from "./Pages/AdminLayout.jsx";
@@ -36,7 +37,7 @@ const App = () => {
       <Routes>
         {/* ================= PUBLIC ROUTES ================= */}
         <Route element={<PublicLayout />}>
-          <Route path="/hero" element={<Home />} />
+          <Route path="/" element={<Home />} />
           <Route path="/aboutpage" element={<AboutUss />} />
           <Route path="/admin/login" element={<RootLogin />} />
           <Route path="/company/login" element={<Companylogin />} />
@@ -54,6 +55,12 @@ const App = () => {
     </AuthGuard>
   }
 />
+<Route path="/candidate/my-profile" element={
+  <AuthGuard role={2}>
+    <MyProfile />
+  </AuthGuard>
+} /> 
+
 
 
         {/* ================= ROOT DASHBOARD (PROTECTED) ================= */}

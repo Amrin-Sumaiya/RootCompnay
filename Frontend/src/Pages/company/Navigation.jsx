@@ -31,8 +31,8 @@ const Navigation = () => {
   }, []);
 
   const scrollToSection = (id) => {
-    if (location.pathname !== "/hero" && location.pathname !== "/") {
-      navigate("/hero");
+    if (location.pathname !== "/" && location.pathname !== "/") {
+      navigate("/");
     }
     
     setTimeout(() => {
@@ -70,7 +70,7 @@ const Navigation = () => {
           
           {/* Logo area */}
           <button
-            onClick={() => scrollToSection("hero")}
+            onClick={() => scrollToSection("/")}
             className="flex items-center gap-1 group"
           >
             <div className="text-2xl md:text-3xl font-extrabold tracking-tighter text-gray-900 group-hover:opacity-80 transition-opacity">
@@ -81,7 +81,7 @@ const Navigation = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-8 items-center">
-            <NavLink label="Home" target="hero" />
+            <NavLink label="Home" target="/" />
             <button
               onClick={() => navigate("/aboutpage")}
               className="font-semibold text-sm text-gray-700 hover:text-green-600 hidden md:flex space-x-8 items-center"

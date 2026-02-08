@@ -21,7 +21,7 @@ function MakingCV() {
   const [districts, setDistricts] = useState([]);
   const [courseOptions, setCourseOptions] = useState([]);
 
-  const [upazilas, setUpazilas] = useState([]);
+  const [ setUpazilas] = useState([]);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -85,16 +85,16 @@ function MakingCV() {
   }, []);
 
   //professional course handlers
-  const handleCourseChange = (e) => {
-  const selected = Array.from(e.target.selectedOptions).map(
-    opt => opt.value
-  );
+//   const handleCourseChange = (e) => {
+//   const selected = Array.from(e.target.selectedOptions).map(
+//     opt => opt.value
+//   );
 
-  setFormData(prev => ({
-    ...prev,
-    professionalCourses: selected
-  }));
-};
+//   setFormData(prev => ({
+//     ...prev,
+//     professionalCourses: selected
+//   }));
+// };
 
 
   // Education Helpers based on your specific requirements
@@ -192,7 +192,7 @@ const getCourseNameById = (id) =>
           setFormData(prev => ({ ...prev, upazila: '' }));
         });
     }
-  }, [formData.district]);
+  }, [formData.district, setUpazilas]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -229,6 +229,40 @@ const getCourseNameById = (id) =>
     }
   };
 
+
+//myprofile fetching existing profile data on component mount
+useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get('/candidate/profile', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (res.data) {
+        setFormData(prev => ({
+          ...prev,
+          ...res.data
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to load profile', err);
+    }
+  };
+
+  fetchProfile();
+}, []);
+
+//logout section
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  navigate("/candidateslogin", { replace: true });
+};
+
+
+
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex flex-col">
       <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
@@ -240,8 +274,20 @@ const getCourseNameById = (id) =>
               <h1 className="text-xl font-bold bg-linear-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">CV Builder</h1>
             </div>
             <div className="flex gap-3">
-              <button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium">💾 Save</button>
-              <button onClick={handleDownload} className="bg-slate-900 hover:bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium">⬇ Download PDF</button>
+                <button
+    onClick={() => navigate("/candidate/my-profile")}
+    className="bg-purple-800 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-full text-sm font-medium"
+  >
+    👤 My Profile
+  </button>
+              <button onClick={handleSave} className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-full text-sm font-medium">💾 Save</button>
+              <button onClick={handleDownload} className="bg-slate-500 hover:bg-blue-600 text-white px-5 py-2.5 rounded-full text-sm font-medium">⬇ Download PDF</button>
+                <button
+    onClick={handleLogout}
+    className="bg-rose-800 hover:bg-rose-700 text-white px-5 py-2.5 rounded-full text-sm font-medium"
+  >
+     Logout
+  </button>
             </div>
           </div>
         </div>
