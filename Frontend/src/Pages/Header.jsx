@@ -6,10 +6,10 @@ const Header = () => {
   const [location, setLocation] = useState('');
 
   // Professional Office Background Image
-  const bgImage = "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2301&auto=format&fit=crop";
+  const bgImage = "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?auto=format&fit=crop&q=80&w=1200";
 
   return (
-    <div className="relative w-full min-h-[650px] flex flex-col justify-center items-center">
+    <div className="relative w-full min-h-162.5 flex flex-col justify-center items-center">
       
       {/* 1. Background Image with Overlay */}
       <div 
@@ -19,7 +19,7 @@ const Header = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
-      >
+      > 
         {/* Dark Blue/Black Gradient Overlay for Text Readability */}
         <div className="absolute inset-0 bg-linear-to-b from-gray-900/90 via-green-900/80 to-gray-900/90"></div>
       </div>

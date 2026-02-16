@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Settings } from "lucide-react";
 
 import {
   Menu,
@@ -115,6 +115,14 @@ const SideNavbar = () => {
   <GraduationCap size={22} />
   {!collapsed && <span>Professional Courses</span>}
 </Link>
+<Link
+  to="/admin/otp-settings"
+  className={navItemClass("/admin/otp-settings")}
+>
+  <Settings size={22} />
+  {!collapsed && <span>OTP Settings</span>}
+</Link>
+
 
         </nav>
 

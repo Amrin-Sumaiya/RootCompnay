@@ -21,6 +21,8 @@ import AdminLayout from "./Pages/AdminLayout.jsx";
 import Dashboard from "./Pages/Dashboard.jsx";
 import Create from "./Pages/Create.jsx";
 import Read from "./Pages/Read.jsx";
+import OtpSettings from "./Pages/Otpsettings.jsx";
+
 
 // ================= COMPANY DASHBOARD =================
 import CompanyLayout from "./Pages/company/CompnayLayout.jsx";
@@ -30,6 +32,7 @@ import CreateJob from "./Pages/company/CreateJob.jsx";
 import JobCandidates from "./Pages/company/JobCandidates.jsx";
 import UpdateJobPost from "./Pages/company/UpdateJobPost.jsx";
 import Companylogin from "./Pages/company/compnaylogin.jsx";
+import CompanyRegister from "./Pages/company/CompanyRegister.jsx";
 
 const App = () => {
   return (
@@ -41,6 +44,7 @@ const App = () => {
           <Route path="/aboutpage" element={<AboutUss />} />
           <Route path="/admin/login" element={<RootLogin />} />
           <Route path="/company/login" element={<Companylogin />} />
+          <Route path="/company/register" element={<CompanyRegister />} />
           <Route path="/company/all-jobs" element={<AllJobs />} />
           <Route path="/jobs/:companyUrl/:jobSlug" element={<JobDetails />} />
           <Route path="/candidateslogin" element={<CandidatesLogin />} />
@@ -76,6 +80,7 @@ const App = () => {
   <Route path="create" element={<Create />} />
   <Route path="read" element={<Read />} />
   <Route path="professional-courses" element={<ProfessionalCourses />} />
+  <Route path="otp-settings" element={<OtpSettings />} />
 </Route>
 
 

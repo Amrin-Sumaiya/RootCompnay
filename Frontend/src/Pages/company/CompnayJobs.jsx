@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from "../../api/axios";
+
 import { 
   FaTrash, 
   FaEdit, 
@@ -39,7 +40,7 @@ const CompanyJobs = () => {
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/jobs/jobs', {
+      const res = await api.get('/jobs/jobs', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setJobs(res.data);
@@ -51,7 +52,7 @@ const CompanyJobs = () => {
   const deleteJob = async (id) => {
     if (!window.confirm('Are you sure you want to delete this job?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/company/jobs/${id}`, {
+      await api.delete(`/company/jobs/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setJobs(prev => prev.filter(job => job.JobID !== id));

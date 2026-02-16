@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
+
 import { Link } from "react-router-dom";
 import ApplyModal from "../../Componenets/ApplyModal"; 
 
@@ -37,7 +38,7 @@ const AllJobs = () => {
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/jobs/all-jobs");
+      const res = await api.get("/jobs/all-jobs");
       setJobs(res.data);
     } catch (err) {
       console.error(err);

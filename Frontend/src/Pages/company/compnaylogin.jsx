@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from "../../api/axios";
+
 
 const CompanyLogin = () => {
   const [email, setEmail] = useState('');
@@ -13,16 +14,16 @@ const CompanyLogin = () => {
     setLoading(true);
     try {
       // Call your backend login API
-      const res = await axios.post('http://localhost:5000/api/company/login', { email, password })
+      const res = await api.post('/company/login', { email, password })
 
       // Save token
     localStorage.setItem('token', res.data.token);
 localStorage.setItem('role', 1);                 // ✅ ADD THIS LINE
-localStorage.setItem('companyUrl', res.data.CompanyURL); // ✅ ADD THIS LINE
+localStorage.setItem('companyUrl', res.data.companyURL); // ✅ ADD THIS LINE
 
 
       // Redirect to company dashboard
-     const companyUrl = res.data.CompanyURL; // Make sure backend sends this
+     const companyUrl = res.data.companyrl; // Make sure backend sends this
       navigate(`/company/${companyUrl}/dashboard`);
     } catch (err) {
       console.error(err);
@@ -104,7 +105,14 @@ localStorage.setItem('companyUrl', res.data.CompanyURL); // ✅ ADD THIS LINE
 
         {/* Footer */}
         <p className="text-center text-slate-500 text-sm mt-8">
-          Don't have an account? <a href="#" className="font-semibold text-blue-600 hover:underline">Contact Admin</a>
+ Don't have an account? 
+<span
+  onClick={() => navigate("/company/register")}
+  className="font-semibold text-blue-600 hover:underline cursor-pointer"
+>
+  Register Here
+</span>
+
         </p>
       </div>
       

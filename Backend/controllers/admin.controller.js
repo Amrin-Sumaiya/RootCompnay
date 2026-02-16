@@ -84,3 +84,29 @@ exports.createProfessionalCourse = (req, res) => {
   );
 };
 
+// GET OTP SETTINGS
+exports.getOtpSettings = (req, res) => {
+  db.query(
+    "SELECT email_otp_enabled, phone_otp_enabled FROM system_settings WHERE id = 1",
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json(result[0]);
+    }
+  );
+};
+
+// UPDATE OTP SETTINGS
+exports.updateOtpSettings = (req, res) => {
+  const { emailEnabled, phoneEnabled } = req.body;
+
+  db.query(
+    "UPDATE system_settings SET email_otp_enabled = ?, phone_otp_enabled = ? WHERE id = 1",
+    [emailEnabled, phoneEnabled],
+    (err) => {
+      if (err) return res.status(500).json(err);
+      res.json({ message: "OTP settings updated successfully" });
+    }
+  );
+};
+
+

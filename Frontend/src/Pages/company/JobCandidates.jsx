@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
+
 import { 
   useReactTable, 
   getCoreRowModel, 
@@ -22,8 +23,8 @@ const JobCandidates = () => {
 
   const fetchCandidates = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/job/candidates/${jobId}`
+      const res = await api.get(
+        `/job/candidates/${jobId}`
       );
       setCandidates(res.data);
     } catch (err) {

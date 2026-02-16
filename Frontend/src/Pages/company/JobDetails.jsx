@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../api/axios";
+
 import { 
   FaBuilding, FaMapMarkerAlt, FaMoneyBillWave, 
   FaBriefcase, FaArrowLeft, FaClock, FaGlobe, FaCheck 
@@ -25,8 +26,8 @@ const JobDetails = () => {
       try {
         // Clean the companyUrl in case of double slashes logic
         const cleanCompanyUrl = companyUrl.replace(/^\//, "");
-        const res = await axios.get(
-          `http://localhost:5000/api/jobs/public/${cleanCompanyUrl}/${jobSlug}`
+        const res = await api.get(
+          `/jobs/public/${cleanCompanyUrl}/${jobSlug}`
         );
         setJob(res.data);
       } catch (err) {

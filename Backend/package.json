@@ -13,14 +13,17 @@
   "type": "commonjs",
   "description": "",
   "dependencies": {
+    "axios": "^1.13.5",
     "bcryptjs": "^3.0.3",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
     "google-auth-library": "^10.5.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
     "mysql": "^2.18.1",
+    "nodemailer": "^8.0.1",
     "nodemon": "^3.1.11"
   }
 }

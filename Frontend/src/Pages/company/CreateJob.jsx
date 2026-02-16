@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from "../../api/axios";
+
 
 const CreateJob = () => {
   // const { companyUrl } = useParams();
@@ -36,8 +37,8 @@ const CreateJob = () => {
     e.preventDefault();
     setLoading(true);
     try {
-await axios.post(
-  'http://localhost:5000/api/jobs/jobs',
+await api.post(
+  '/jobs/jobs',
   form,
   {
     headers: {

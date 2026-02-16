@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import axios from 'axios';
+import api from "../api/axios";
+
 import { Link } from 'react-router-dom';
 import { FaTrash, FaEdit, FaLink, FaCalendarAlt, FaBuilding, FaSearch } from 'react-icons/fa'; // Added FaSearch
 import { 
@@ -31,7 +32,7 @@ password: ''
   const fetchCompanies = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/admin/companies' , {
+      const res = await api.get("/admin/companies", {
   headers: {
     Authorization: `Bearer ${localStorage.getItem("token")}`
   }
@@ -73,8 +74,8 @@ password: ''
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(
-        `http://localhost:5000/api/igl/update_company/${selectedCompany.CompanyID}`,
+      await api.put(
+        `/admin/update_company/${selectedCompany.CompanyID}`,
         editData
       );
       fetchCompanies();
@@ -89,7 +90,7 @@ password: ''
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this company?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/igl/delete_company/${id}`);
+      await api.delete(`/admin/delete_company/${id}`);
       fetchCompanies();
     // eslint-disable-next-line no-unused-vars
     } catch (error) {

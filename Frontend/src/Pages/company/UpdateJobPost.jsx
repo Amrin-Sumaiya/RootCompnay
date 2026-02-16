@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from "../../api/axios";
+
 import { FaArrowLeft, FaSave } from 'react-icons/fa';
 
 const UpdateJobPost = () => {
@@ -34,8 +35,8 @@ const UpdateJobPost = () => {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/company/jobs/${id}`,
+        const res = await api.get(
+          `/company/jobs/${id}`,
           { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
         );
         setForm(res.data);
@@ -58,8 +59,8 @@ const UpdateJobPost = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      await axios.put(
-        `http://localhost:5000/api/company/jobs/${id}`,
+      await api.put(
+        `/company/jobs/${id}`,
         form,
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
