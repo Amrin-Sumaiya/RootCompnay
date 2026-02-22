@@ -95,7 +95,8 @@ exports.getCompanyJobs = (req, res) => {
 // ================= UPDATE JOB =================
 exports.updateJob = (req, res) => {
   const { id } = req.params;
-  const { companyId } = req.user;
+ const { companyId, companyUrl } = req.user;
+
 
   const {
     JobTitle,
@@ -127,7 +128,7 @@ exports.updateJob = (req, res) => {
 
   const sql = `
     UPDATE jobs SET
-      JobTitle = ?, JobSlug = ?, JobLink = ?,
+      JobTitle = ?, JobSlug = ?, 
       JobDescription = ?, JobResponsibilities = ?, Qualifications = ?, Skills = ?,
       JobType = ?, WeeklyVacation = ?, Benefits = ?, Experience = ?, JobLocation = ?,
       Address = ?, Country = ?, State = ?, City = ?,
@@ -140,7 +141,6 @@ exports.updateJob = (req, res) => {
     [
       JobTitle,
       slug,
-      jobLink,
       JobDescription,
       JobResponsibilities,
       Qualifications,
@@ -290,6 +290,18 @@ exports.getPublicJobDetails = (req, res) => {
     res.json(result[0]);
   });
 };
+
+// ================= GET ALL COMPANY TYPES (PUBLIC) =================
+exports.getCompanyTypes = (req, res) => {
+  db.query(
+    'SELECT id, name FROM company_types ORDER BY name ASC',
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json(result);
+    }
+  );
+};
+
 
 
 

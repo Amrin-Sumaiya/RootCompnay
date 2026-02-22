@@ -28,8 +28,8 @@ const Footer = () => {
         <div>
           <h3 className="font-semibold mb-2">Contact</h3>
           <p className="text-gray-400 text-sm">Dhanmondi-4, Road:4(House-33(A))</p>
-          <p className="text-gray-400 text-sm">Email: 445569@IGL.com</p>
-          <p className="text-gray-400 text-sm">Phone: +1 234 567 890</p>
+          <p className="text-gray-400 text-sm">Email: support@iglweb.com</p>
+          <p className="text-gray-400 text-sm">Phone: +880-1958-666999</p>
 
           {/* Social Icons */}
           <div className="flex space-x-3 mt-3">

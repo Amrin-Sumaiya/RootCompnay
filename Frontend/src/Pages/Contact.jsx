@@ -5,8 +5,8 @@ const Contact = () => {
   const contactData = {
     paragraph:
       "We’d love to hear from you! Fill out the form below and our team will get back to you shortly.",
-    email: "info@jobportal.com",
-    phone: "+1 555 123 4567",
+    email: "support@iglweb.com",
+    phone: "+880-1958-666999.",
   };
 
   const [formData, setFormData] = useState({

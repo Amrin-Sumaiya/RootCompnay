@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { Building2, User, Mail, Phone, Lock, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
@@ -7,6 +7,21 @@ const CompanyRegister = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [companyTypes, setCompanyTypes] = useState([]);
+useEffect(() => {
+  const fetchTypes = async () => {
+    try {
+      const res = await api.get("/admin/company-types");
+      setCompanyTypes(res.data);
+    // eslint-disable-next-line no-unused-vars
+    } catch (err) {
+      console.error("Failed to load company types");
+    }
+  };
+
+  fetchTypes();
+}, []);
+
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -165,7 +180,28 @@ const CompanyRegister = () => {
                 <InputGroup icon={<User size={18}/>} name="personName" value={formData.personName} placeholder="Person Name" onChange={handleChange} required />
               </div>
 
-              <InputGroup icon={<ShieldCheck size={18}/>} name="companyType" value={formData.companyType} placeholder="Company Type (e.g. LLC, Corp)" onChange={handleChange} required />
+<div className="relative group">
+  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors">
+    <ShieldCheck size={18} />
+  </div>
+
+  <select
+    name="companyType"
+    value={formData.companyType}
+    onChange={handleChange}
+    required
+    className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-gray-700"
+  >
+    <option value="">Select Company Type</option>
+
+    {companyTypes.map((type) => (
+      <option key={type.id} value={type.id}>
+        {type.name}
+      </option>
+    ))}
+  </select>
+</div>
+
               <InputGroup icon={<Lock size={18}/>} type="password" name="password" value={formData.password} placeholder="Password" onChange={handleChange} required />
 
               <button

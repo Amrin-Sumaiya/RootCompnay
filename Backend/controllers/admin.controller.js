@@ -109,4 +109,41 @@ exports.updateOtpSettings = (req, res) => {
   );
 };
 
+// ================= CREATE COMPANY TYPE =================
+exports.createCompanyType = (req, res) => {
+  const { name } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ message: 'Company type name is required' });
+  }
+
+  db.query(
+    'INSERT INTO company_types (name) VALUES (?)',
+    [name],
+    (err) => {
+      if (err) {
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ message: 'Company type already exists' });
+        }
+        return res.status(500).json(err);
+      }
+
+      res.status(201).json({ message: 'Company type created successfully' });
+    }
+  );
+};
+
+// ================= GET ALL COMPANY TYPES (PUBLIC) =================
+exports.getCompanyTypes = (req, res) => {
+  db.query(
+    'SELECT id, name FROM company_types ORDER BY name ASC',
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json(result);
+    }
+  );
+};
+
+
+
 

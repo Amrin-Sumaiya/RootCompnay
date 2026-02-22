@@ -1,50 +1,92 @@
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const sendOTPEmail = require("../utils/sendEmail");
 
 exports.registerCandidate = (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, phone, email, password } = req.body;
 
-  // 1️⃣ Check if email already exists (ANY TYPE)
   db.query(
-    'SELECT id, type FROM users WHERE email = ?',
+    "SELECT id FROM users WHERE email = ?",
     [email],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json({ message: 'Server error' });
-      }
+    async (err, rows) => {
+      if (err) return res.status(500).json({ message: "Server error" });
 
       if (rows.length > 0) {
         return res.status(400).json({
-          message: 'This email is already registered. Please login instead.'
+          message: "Email already registered",
         });
       }
 
-      // 2️⃣ Hash password
       const hashedPassword = bcrypt.hashSync(password, 10);
 
-      // 3️⃣ Insert candidate
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+
       db.query(
-        'INSERT INTO users (name, email, password, type) VALUES (?, ?, ?, 2)',
-        [name, email, hashedPassword],
-        (err, result) => {
-          if (err) {
-            return res.status(500).json({ message: 'Failed to register user' });
-          }
+        `INSERT INTO users 
+        (name, phone, email, password, type, otp, otp_expiry, is_verified) 
+        VALUES (?, ?, ?, ?, 2, ?, ?, 0)`,
+        [name, phone, email, hashedPassword, otp, otpExpiry],
+        async (err) => {
+          if (err)
+            return res.status(500).json({ message: "Registration failed" });
 
-          const token = jwt.sign(
-            { userId: result.insertId, type: 2, email },
-            process.env.JWT_SECRET,
-            { expiresIn: '1d' }
-          );
+          await sendOTPEmail(email, otp);
 
-          res.json({ token, message: 'Registration successful' });
+          res.json({
+            message: "OTP sent to your email",
+          });
         }
       );
     }
   );
 };
 
+
+//OTP controller create 
+exports.verifyEmailOTP = (req, res) => {
+  const { email, otp } = req.body;
+
+  db.query(
+    "SELECT * FROM users WHERE email = ?",
+    [email],
+    (err, rows) => {
+      if (err || !rows.length)
+        return res.status(400).json({ message: "Invalid request" });
+
+      const user = rows[0];
+
+      if (user.is_verified)
+        return res.json({ message: "Already verified" });
+
+      if (user.otp !== otp)
+        return res.status(400).json({ message: "Invalid OTP" });
+
+      if (new Date(user.otp_expiry) < new Date())
+        return res.status(400).json({ message: "OTP expired" });
+
+      // Update verified status
+      db.query(
+        "UPDATE users SET is_verified = 1, otp = NULL, otp_expiry = NULL WHERE email = ?",
+        [email],
+        (err) => {
+          if (err)
+            return res.status(500).json({ message: "Verification failed" });
+
+          // Generate JWT token after OTP verification
+          const token = jwt.sign(
+            { userId: user.id, type: 2, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+          );
+
+          res.json({ message: "Email verified successfully", token });
+        }
+      );
+    }
+  );
+};
 exports.loginCandidate = (req, res) => {
   const { email, password } = req.body;
 

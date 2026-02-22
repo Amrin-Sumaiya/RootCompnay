@@ -7,7 +7,7 @@ const OtpSettings = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axios.get("/admin/otp-settings", {
+    axios.get("http://localhost:5000/api/admin/otp-settings", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => {
   setEmailEnabled(Boolean(res.data.email_otp_enabled));
@@ -18,7 +18,7 @@ const OtpSettings = () => {
   const saveSettings = async () => {
     setLoading(true);
     try {
-      await axios.put("/admin/otp-settings",
+      await axios.put("http://localhost:5000/api/admin/otp-update",
         { emailEnabled, phoneEnabled },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );

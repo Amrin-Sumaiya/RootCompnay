@@ -86,11 +86,11 @@ const CompanyJobs = () => {
       cell: info => <span className="font-bold text-gray-800">{info.getValue()}</span>,
     },
     {
-      header: 'Location',
-      accessorFn: row => `${row.City}, ${row.Country}`,
+      header: 'Experience',
+      accessorFn: row => `${row.Experience} years`,
       cell: info => (
         <div className="flex items-center justify-center gap-1 text-sm text-gray-600">
-          <FaMapMarkerAlt className="text-gray-400" /> {info.getValue()}
+          < FaBriefcase className="text-gray-400" /> {info.getValue()}
         </div>
       )
     },

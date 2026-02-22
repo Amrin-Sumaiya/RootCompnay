@@ -8,6 +8,7 @@ const DEGREE_SEQUENCE = ['PSC', 'JSC', 'SSC', 'HSC', 'BSc', 'MSc', 'PhD'];
 function MakingCV() {
   const cvRef = useRef(null);
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   // State for raw data from APIs
   const [allSchoolData, setAllSchoolData] = useState([]);
@@ -40,8 +41,8 @@ function MakingCV() {
     duration: '',
     description: '',
     skills: '',
-    professionalCourses: []
-
+    professionalCourses: [],
+    photo: null // new field for photo
   });
 
   //fetc h course options
@@ -206,6 +207,18 @@ const getCourseNameById = (id) =>
     }
   };
 
+  // photo upload handler
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, photo: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleDownload = () => {
     const element = cvRef.current;
     const opt = {
@@ -311,6 +324,33 @@ const handleLogout = () => {
                 <h2 className="text-lg font-bold text-slate-800">Personal Details</h2>
               </div>
               <div className="grid grid-cols-2 gap-5">
+                {/* Photo Upload Field */}
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Candidate Photo</label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-full border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden">
+                      {formData.photo ? (
+                        <img src={formData.photo} alt="preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-3xl text-slate-400">📷</span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current.click()}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                    >
+                      Upload Photo
+                    </button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handlePhotoUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                  </div>
+                </div>
                 <div className="col-span-2">
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Full Name</label>
                   <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all duration-200" placeholder="e.g. Sultan Ahmed" />
@@ -559,20 +599,28 @@ const handleLogout = () => {
             </div>
             <div className="grow overflow-y-auto p-8 flex justify-center items-start z-10">
               <div ref={cvRef} className="bg-[#ffffff] w-[210mm] min-h-[297mm] shadow-[0_0_50px_rgba(0,0,0,0.25)] p-10 text-[#333333] transform scale-95 origin-top lg:scale-100 transition-transform">
-                <div className="border-b-2 border-[#333333] pb-6 mb-8 flex flex-col justify-between h-auto">
-                  <div>
-                    <h1 className="text-5xl font-extrabold uppercase tracking-tight mb-2 text-[#000000] leading-tight">{formData.fullName || 'YOUR NAME'}</h1>
+                <div className="border-b-2 border-[#333333] pb-6 mb-8 flex flex-row justify-between items-start">
+                  <div className="flex-1">
+                    <h1 className="text-5xl font-extrabold  tracking-tight mb-2 text-[#000000] leading-tight">{formData.fullName || 'YOUR NAME'}</h1>
                     <p className="text-2xl text-[#1029b9] font-medium tracking-wide">{formData.profession || 'Professional Title'}</p>
+                    <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-[#555555]">
+                      {formData.phone && <span className="flex items-center gap-1">📞 {formData.phone}</span>}
+                      {formData.email && <span className="flex items-center gap-1">📧 {formData.email}</span>}
+                      {(formData.district || formData.division) && (
+                        <span className="flex items-center gap-1">
+                          📍 {formData.address && `${formData.address}, `}
+                          {getDistrictName() && `${getDistrictName()}, `}
+                          {getDivisionName()}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-[#555555]">
-                    {formData.phone && <span className="flex items-center gap-1">📞 {formData.phone}</span>}
-                    {formData.email && <span className="flex items-center gap-1">📧 {formData.email}</span>}
-                    {(formData.district || formData.division) && (
-                      <span className="flex items-center gap-1">
-                        📍 {formData.address && `${formData.address}, `}
-                        {getDistrictName() && `${getDistrictName()}, `}
-                        {getDivisionName()}
-                      </span>
+                  {/* Candidate Photo in Preview */}
+                  <div className="ml-6 w-38 h-38 rounded-full border-4 border-black overflow-hidden bg-slate-100 flex-shrink-0">
+                    {formData.photo ? (
+                      <img src={formData.photo} alt="candidate" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-4xl text-slate-400">📷</div>
                     )}
                   </div>
                 </div>

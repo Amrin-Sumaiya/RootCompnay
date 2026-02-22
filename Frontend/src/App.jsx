@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AuthGuard from "./auth/AuthGuard.jsx";
 import JobDetails from "./Pages/company/JobDetails.jsx";
-import ProfessionalCourses from "./Pages/ProfessionalCourses.jsx";
+
 
 // ================= PUBLIC PAGES =================
 import PublicLayout from "./layouts/PublicLayout.jsx";
@@ -15,6 +15,7 @@ import CandidatesLogin from "./Pages/CandidatesLogin.jsx";
 // ================= CANDIDATE PAGE =================
 import Making from "./Pages/makingcv.jsx";
 import MyProfile from "./Pages/MyProfile.jsx";
+import OTPVerify from "./Pages/OTPVerify.jsx";
 
 // ================= ROOT DASHBOARD =================
 import AdminLayout from "./Pages/AdminLayout.jsx";
@@ -22,6 +23,8 @@ import Dashboard from "./Pages/Dashboard.jsx";
 import Create from "./Pages/Create.jsx";
 import Read from "./Pages/Read.jsx";
 import OtpSettings from "./Pages/Otpsettings.jsx";
+import ProfessionalCourses from "./Pages/ProfessionalCourses.jsx";
+import CompanyTypes from "./Pages/company/CompanyTypes.jsx";
 
 
 // ================= COMPANY DASHBOARD =================
@@ -64,6 +67,7 @@ const App = () => {
     <MyProfile />
   </AuthGuard>
 } /> 
+<Route path="/otp-verify" element={<OTPVerify />} />
 
 
 
@@ -81,6 +85,7 @@ const App = () => {
   <Route path="read" element={<Read />} />
   <Route path="professional-courses" element={<ProfessionalCourses />} />
   <Route path="otp-settings" element={<OtpSettings />} />
+  <Route path="company-types" element={<CompanyTypes />} />
 </Route>
 
 

@@ -7,7 +7,7 @@ const role = require('../middleware/role.middleware');
 const {
   createCompanyWithUser,
   getAllCompanies,
-  getOtpSettings, updateOtpSettings
+  getOtpSettings, updateOtpSettings, createCompanyType, getCompanyTypes
 } = require('../controllers/admin.controller');
 
 router.post('/company', auth, role('root'), createCompanyWithUser);
@@ -22,8 +22,9 @@ router.post(
   createProfessionalCourse
 );
 
+router.post('/company-type', auth, role('root'), createCompanyType);
 router.get('/otp-settings', auth, role('root'), getOtpSettings);
-router.put('/otp-settings', auth, role('root'), updateOtpSettings);
-
+router.put('/otp-update', auth, role('root'), updateOtpSettings);
+router.get('/company-types', getCompanyTypes);
 
 module.exports = router;

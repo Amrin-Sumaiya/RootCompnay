@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { GraduationCap, Settings } from "lucide-react";
-
 import {
   Menu,
   X,
@@ -9,6 +7,9 @@ import {
   ChevronRight,
   LayoutDashboard,
   Building2,
+  GraduationCap,
+  Settings,
+  Briefcase,
   LogOut,
 } from "lucide-react";
 import Logo from "../assets/igl.png";
@@ -30,7 +31,7 @@ const SideNavbar = () => {
   };
 
   const navItemClass = (path) => `
-    flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group font-medium
+    flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group font-medium shrink-0
     ${
       isActive(path)
         ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/20"
@@ -57,10 +58,10 @@ const SideNavbar = () => {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Changed md:static to md:sticky so it doesn't scroll away */}
       <aside
         className={`
-          fixed md:static z-50 top-0 left-0 h-screen bg-slate-900 text-slate-100 
+          fixed md:sticky z-50 top-0 left-0 h-screen bg-slate-900 text-slate-100 
           transition-all duration-300 border-r border-slate-800 flex flex-col shadow-2xl
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0
@@ -69,7 +70,7 @@ const SideNavbar = () => {
       >
         {/* Logo */}
         <div
-          className={`flex items-center p-6 border-b border-slate-800 ${
+          className={`flex items-center p-6 border-b border-slate-800 shrink-0 ${
             collapsed ? "justify-center" : "justify-between"
           }`}
         >
@@ -87,8 +88,10 @@ const SideNavbar = () => {
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2 mt-2 overflow-y-auto">
+        {/* Navigation - Added custom scrollbar styles here */}
+        <nav 
+          className="flex-1 p-4 space-y-2 mt-2 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-600 transition-colors"
+        >
           <Link
             to="/admin/dashboard"
             className={navItemClass("/admin/dashboard")}
@@ -108,26 +111,36 @@ const SideNavbar = () => {
           </Link>
 
           <Link
-  to="/admin/professional-courses"
-  className={navItemClass("/admin/professional-courses")}
+            to="/admin/professional-courses"
+            className={navItemClass("/admin/professional-courses")}
+            onClick={() => setMobileOpen(false)}
+          >
+            <GraduationCap size={22} />
+            {!collapsed && <span>Professional Courses</span>}
+          </Link>
+
+          <Link
+            to="/admin/otp-settings"
+            className={navItemClass("/admin/otp-settings")}
+            onClick={() => setMobileOpen(false)}
+          >
+            <Settings size={22} />
+            {!collapsed && <span>OTP Settings</span>}
+          </Link>
+
+{/* Replace your old link with this new one */}
+<Link
+  to="/admin/company-types"
+  className={navItemClass("/admin/company-types")}
   onClick={() => setMobileOpen(false)}
 >
-  <GraduationCap size={22} />
-  {!collapsed && <span>Professional Courses</span>}
+  <Briefcase size={22} />
+  {!collapsed && <span>Company Types</span>}
 </Link>
-<Link
-  to="/admin/otp-settings"
-  className={navItemClass("/admin/otp-settings")}
->
-  <Settings size={22} />
-  {!collapsed && <span>OTP Settings</span>}
-</Link>
-
-
         </nav>
 
         {/* Logout */}
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-800 shrink-0">
           <button
             onClick={handleLogout}
             className={`

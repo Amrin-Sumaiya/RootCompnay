@@ -132,7 +132,8 @@ const JobDetails = () => {
                 <div>
                       <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide border-b pb-2 mb-3">Requirements</h3>
                       <p className="text-slate-600 text-sm leading-6 whitespace-pre-line">
-                        {job.Qualifications}
+                        {job.Qualifications || "Not specified"}
+
                       </p>
                 </div>
 
