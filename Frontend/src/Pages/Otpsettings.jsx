@@ -7,7 +7,7 @@ const OtpSettings = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/admin/otp-settings", {
+    axios.get("https://backend.igltour.com/api/admin/otp-settings", {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     }).then(res => {
   setEmailEnabled(Boolean(res.data.email_otp_enabled));
@@ -18,7 +18,7 @@ const OtpSettings = () => {
   const saveSettings = async () => {
     setLoading(true);
     try {
-      await axios.put("http://localhost:5000/api/admin/otp-update",
+      await axios.put("https://backend.igltour.com/api/admin/otp-update",
         { emailEnabled, phoneEnabled },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
@@ -70,7 +70,7 @@ const OtpSettings = () => {
             <div className="flex flex-col">
               <span className="font-semibold text-gray-700">Phone OTP (SMS)</span>
               <span className="text-xs text-gray-500">Send verification codes via SMS to mobile numbers.</span>
-            </div>
+            </div> 
             <button
               onClick={() => setPhoneEnabled(!phoneEnabled)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${

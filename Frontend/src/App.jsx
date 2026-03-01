@@ -25,6 +25,8 @@ import Read from "./Pages/Read.jsx";
 import OtpSettings from "./Pages/Otpsettings.jsx";
 import ProfessionalCourses from "./Pages/ProfessionalCourses.jsx";
 import CompanyTypes from "./Pages/company/CompanyTypes.jsx";
+import Universities from "./Pages/Universities.jsx";
+import Schools from "./Pages/Schools.jsx";
 
 
 // ================= COMPANY DASHBOARD =================
@@ -86,6 +88,8 @@ const App = () => {
   <Route path="professional-courses" element={<ProfessionalCourses />} />
   <Route path="otp-settings" element={<OtpSettings />} />
   <Route path="company-types" element={<CompanyTypes />} />
+  <Route path="universities" element={<Universities />} />
+  <Route path="schools" element={<Schools />} />
 </Route>
 
 

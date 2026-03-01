@@ -16,6 +16,17 @@ app.use('/api/jobs', require('./routes/job.routes'));
 app.use('/api/job', require('./routes/jobApplication.routes'));
 app.use('/api/candidate-auth', require('./routes/candidate-auth.routes'));
 app.use('/api/common', require('./routes/common.routes'));
+app.use('/api/locations', require('./routes/location.routes'));
+
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED REJECTION:", err);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION:", err);
+});
 
 
-app.listen(5000, () => console.log('Server running on 5000'));
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));

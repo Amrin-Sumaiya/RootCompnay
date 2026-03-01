@@ -31,12 +31,13 @@ exports.registerCandidate = (req, res) => {
         async (err) => {
           if (err)
             return res.status(500).json({ message: "Registration failed" });
-
-          await sendOTPEmail(email, otp);
-
-          res.json({
-            message: "OTP sent to your email",
-          });
+try {
+  await sendOTPEmail(email, otp);
+  return res.json({ message: "OTP sent to your email" });
+} catch (error) {
+  console.error("EMAIL ERROR:", error);
+  return res.status(500).json({ message: "Failed to send OTP email" });
+}
         }
       );
     }

@@ -10,7 +10,7 @@ exports.createCompanyWithUser = (req, res) => {
 
   const hashed = bcrypt.hashSync(password, 10);
 
-  // ✅ ONLY type
+  //  ONLY type
   db.query(
     'INSERT INTO users (email, password, type) VALUES (?, ?, ?)',
     [email, hashed, 1], // 1 = company
@@ -137,6 +137,86 @@ exports.createCompanyType = (req, res) => {
 exports.getCompanyTypes = (req, res) => {
   db.query(
     'SELECT id, name FROM company_types ORDER BY name ASC',
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json(result);
+    }
+  );
+};
+
+// ================= CREATE UNIVERSITY =================
+exports.createUniversity = (req, res) => {
+  const { name } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ message: "University name is required" });
+  }
+
+  const userId = req.user.id; // comes from auth middleware
+
+  db.query(
+    "INSERT INTO universities (name, created_by) VALUES (?, ?)",
+    [name, userId],
+    (err) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(400).json({ message: "University already exists" });
+        }
+        return res.status(500).json(err);
+      }
+
+      res.status(201).json({ message: "University created successfully" });
+    }
+  );
+};
+
+// ================= GET ALL UNIVERSITIES =================
+exports.getUniversities = (req, res) => {
+  db.query(
+    `
+    SELECT 
+      u.id,
+      u.name,
+      us.email AS created_by_email
+    FROM universities u
+    LEFT JOIN users us ON us.id = u.created_by
+    ORDER BY u.name ASC
+    `,
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json(result);
+    }
+  );
+};
+
+// ================= CREATE SCHOOL =================
+exports.createSchool = (req, res) => {
+  const { name } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ message: "School name is required" });
+  }
+
+  db.query(
+    "INSERT INTO schools (name) VALUES (?)",
+    [name],
+    (err) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          return res.status(400).json({ message: "School already exists" });
+        }
+        return res.status(500).json(err);
+      }
+
+      res.status(201).json({ message: "School created successfully" });
+    }
+  );
+};
+
+// ================= GET ALL SCHOOLS =================
+exports.getSchools = (req, res) => {
+  db.query(
+    "SELECT id, name FROM schools ORDER BY name ASC",
     (err, result) => {
       if (err) return res.status(500).json(err);
       res.json(result);

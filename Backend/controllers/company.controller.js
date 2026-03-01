@@ -77,7 +77,9 @@ exports.sendOTP = async (req, res) => {
       try {
         if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
           const transporter = nodemailer.createTransport({
-            service: "gmail",
+             host: "mail.igltour.com",
+  port: 465,
+  secure: true,
             auth: {
               user: process.env.EMAIL_USER,
               pass: process.env.EMAIL_PASS

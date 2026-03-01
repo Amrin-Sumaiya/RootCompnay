@@ -88,7 +88,7 @@ const JobCandidates = () => {
       cell: (info) => (
         info.getValue() ? (
           <a
-            href={`http://localhost:5000/uploads/${info.getValue()}`}
+            href={`https://backend.igltour.com/uploads/${info.getValue()}`}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border border-red-100"

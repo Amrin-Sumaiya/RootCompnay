@@ -137,6 +137,25 @@ const SideNavbar = () => {
   <Briefcase size={22} />
   {!collapsed && <span>Company Types</span>}
 </Link>
+
+
+<Link
+  to="/admin/universities"
+  className={navItemClass("/admin/universities")}
+  onClick={() => setMobileOpen(false)}
+>
+  <GraduationCap size={22} />
+  {!collapsed && <span>Universities</span>}
+</Link>
+
+<Link
+  to="/admin/schools"
+  className={navItemClass("/admin/schools")}
+  onClick={() => setMobileOpen(false)}
+>
+  <Building2 size={22} />
+  {!collapsed && <span>Schools</span>}
+</Link>
         </nav>
 
         {/* Logout */}

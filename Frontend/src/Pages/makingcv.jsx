@@ -22,7 +22,17 @@ function MakingCV() {
   const [districts, setDistricts] = useState([]);
   const [courseOptions, setCourseOptions] = useState([]);
 
-  const [ setUpazilas] = useState([]);
+ const [upazilas, setUpazilas] = useState([]);
+
+  // Search states for institutions
+  const [schoolSearchTerm, setSchoolSearchTerm] = useState('');
+  const [uniSearchTerm, setUniSearchTerm] = useState('');
+  const [filteredSchools, setFilteredSchools] = useState([]);
+  const [filteredUnis, setFilteredUnis] = useState([]);
+  const [showSchoolDropdown, setShowSchoolDropdown] = useState(false);
+  const [showUniDropdown, setShowUniDropdown] = useState(false);
+  const schoolDropdownRef = useRef(null);
+  const uniDropdownRef = useRef(null);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -60,29 +70,68 @@ function MakingCV() {
 
 
   // Fetch all institution data from your provided HTTP endpoints
+  
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch Schools & Colleges
-        const schoolRes = await fetch('http://bd-institution-data.solutya.com/data/bd_schoolName_data.json');
-        const schoolData = await schoolRes.json();
-        setAllSchoolData(Array.isArray(schoolData) ? schoolData : []);
+  const fetchInstitutions = async () => {
+    try {
+      const schoolRes = await api.get('/admin/schools');
+      setAllSchoolData(schoolRes.data);
+      setFilteredSchools(schoolRes.data);
 
-        // Fetch Public Universities
-        const publicRes = await fetch('http://bd-institution-data.solutya.com/data/public_Uni_data.json');
-        const publicData = await publicRes.json();
-        setPublicUniData(Array.isArray(publicData) ? publicData : []);
+      const uniRes = await api.get('/admin/universities');
+     setPublicUniData(uniRes.data);
+setPrivateUniData(uniRes.data);  // we will use this
+      setFilteredUnis(uniRes.data);
+    } catch (err) {
+      console.error("Failed to fetch institutions", err);
+    }
+  };
 
-        // Fetch Private Universities
-        const privateRes = await fetch('http://bd-institution-data.solutya.com/data/private_Uni_data.json');
-        const privateData = await privateRes.json();
-        setPrivateUniData(Array.isArray(privateData) ? privateData : []);
+  fetchInstitutions();
+}, []);
 
-      } catch (err) {
-        console.error("Failed to fetch institution data. Note: Browser may block HTTP on HTTPS sites.", err);
+  // Filter schools based on search term
+  useEffect(() => {
+    if (schoolSearchTerm.trim() === '') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFilteredSchools(allSchoolData);
+    } else {
+      const filtered = allSchoolData.filter(school => 
+        school.name.toLowerCase().includes(schoolSearchTerm.toLowerCase())
+      );
+      setFilteredSchools(filtered);
+    }
+  }, [schoolSearchTerm, allSchoolData]);
+
+  // Filter universities based on search term
+  useEffect(() => {
+    const currentUniData = uniType === 'public' ? publicUniData : privateUniData;
+    if (uniSearchTerm.trim() === '') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFilteredUnis(currentUniData);
+    } else {
+      const filtered = currentUniData.filter(uni => 
+        uni.name.toLowerCase().includes(uniSearchTerm.toLowerCase())
+      );
+      setFilteredUnis(filtered);
+    }
+  }, [uniSearchTerm, uniType, publicUniData, privateUniData]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (schoolDropdownRef.current && !schoolDropdownRef.current.contains(event.target)) {
+        setShowSchoolDropdown(false);
       }
+      if (uniDropdownRef.current && !uniDropdownRef.current.contains(event.target)) {
+        setShowUniDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-    fetchData();
   }, []);
 
   //professional course handlers
@@ -99,26 +148,26 @@ function MakingCV() {
 
 
   // Education Helpers based on your specific requirements
-  const getAllowedDegrees = (index) => {
+  function getAllowedDegrees(index) {
     if (index === 0) return DEGREE_SEQUENCE;
     const prevDegree = formData.education[index - 1]?.degree;
     const prevIndex = DEGREE_SEQUENCE.indexOf(prevDegree);
     return prevIndex >= 0 ? DEGREE_SEQUENCE.slice(prevIndex + 1) : [];
-  };
+  }
 
-  const getInstitutesByDegree = (degree) => {
-    if (!degree) return [];
-    // PSC, JSC, SSC, HSC use the school/college API
-    if (['PSC', 'JSC', 'SSC', 'HSC'].includes(degree)) {
-      return allSchoolData.map(item => item.name || item);
-    }
-    // BSc, MSc, PhD use University APIs based on current uniType selection
-    if (['BSc', 'MSc', 'PhD'].includes(degree)) {
-      const targetData = uniType === 'public' ? publicUniData : privateUniData;
-      return targetData.map(item => item.name || item);
-    }
-    return [];
-  };
+const getInstitutesByDegree = (degree) => {
+  if (!degree) return [];
+
+  if (['PSC', 'JSC', 'SSC', 'HSC'].includes(degree)) {
+    return allSchoolData.map(item => item.name);
+  }
+
+  if (['BSc', 'MSc', 'PhD'].includes(degree)) {
+    return publicUniData.map(item => item.name);
+  }
+
+  return [];
+};
 
   const handleEducationChange = (index, e) => {
     const { name, value } = e.target;
@@ -129,6 +178,16 @@ function MakingCV() {
       updated[index].institute = '';
     }
     setFormData(prev => ({ ...prev, education: updated }));
+  };
+
+  const handleInstituteSelect = (index, instituteName) => {
+    const updated = [...formData.education];
+    updated[index].institute = instituteName;
+    setFormData(prev => ({ ...prev, education: updated }));
+    setShowSchoolDropdown(false);
+    setShowUniDropdown(false);
+    setSchoolSearchTerm('');
+    setUniSearchTerm('');
   };
 
   const addEducation = () => {
@@ -163,37 +222,42 @@ const getCourseNameById = (id) =>
 
   const getDivisionName = () => divisions.find(d => d.id === formData.division)?.name || '';
   const getDistrictName = () => districts.find(d => d.id === formData.district)?.name || '';
-
+ const getUpazilaName = () => upazilas.find(u => u.id === formData.upazila)?.name || '';
   // Location Logic
-  useEffect(() => {
-    fetch('https://bdapi.vercel.app/api/v.1/division')
-      .then(res => res.json())
-      .then(data => setDivisions(data.data || []))
+useEffect(() => {
+  const fetchDivisions = async () => {
+    try {
+      const res = await api.get('/locations/divisions');
+      setDivisions(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchDivisions();
+}, []);
+
+useEffect(() => {
+  if (formData.division) {
+    api.get(`/locations/districts/${formData.division}`)
+      .then(res => {
+        setDistricts(res.data);
+        setFormData(prev => ({ ...prev, district: '', upazila: '' }));
+      })
       .catch(err => console.error(err));
-  }, []);
+  }
+}, [formData.division]);
 
-  useEffect(() => {
-    if (formData.division) {
-      fetch(`https://bdapi.vercel.app/api/v.1/district/${formData.division}`)
-        .then(res => res.json())
-        .then(data => {
-          setDistricts(data.data || []);
-          setFormData(prev => ({ ...prev, district: '', upazila: '' }));
-        });
-    }
-  }, [formData.division]);
-
-  useEffect(() => {
-    if (formData.district) {
-      fetch(`https://bdapi.vercel.app/api/v.1/district/${formData.district}`)
-        .then(res => res.json())
-        .then(data => {
-          // eslint-disable-next-line no-undef
-          setUpazilas(data.data || []);
-          setFormData(prev => ({ ...prev, upazila: '' }));
-        });
-    }
-  }, [formData.district, setUpazilas]);
+useEffect(() => {
+  if (formData.district) {
+    api.get(`/locations/upazilas/${formData.district}`)
+      .then(res => {
+        setUpazilas(res.data);
+        setFormData(prev => ({ ...prev, upazila: '' }));
+      })
+      .catch(err => console.error(err));
+  }
+}, [formData.district]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -403,6 +467,27 @@ const handleLogout = () => {
                     {districts.map((dis) => (<option key={dis.id} value={dis.id}>{dis.name}</option>))}
                   </select>
                 </div>
+
+<div>
+  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+    Thana / Upazila
+  </label>
+
+  <select
+    name="upazila"
+    value={formData.upazila}
+    onChange={handleChange}
+    disabled={!formData.district}
+    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all disabled:bg-slate-100 disabled:cursor-not-allowed"
+  >
+    <option value="">Select Upazila</option>
+    {upazilas.map((up) => (
+      <option key={up.id} value={up.id}>
+        {up.name}
+      </option>
+    ))}
+  </select>
+</div>
                 <div className="col-span-2">
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Village / Road Address</label>
                   <textarea name="address" value={formData.address} onChange={handleChange} rows="2" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none"></textarea>
@@ -429,7 +514,7 @@ const handleLogout = () => {
     {formData.education.map((edu, index) => {
       const allowedDegrees = getAllowedDegrees(index);
       const isUniDegree = ['BSc', 'MSc', 'PhD'].includes(edu.degree);
-      const instituteList = getInstitutesByDegree(edu.degree);
+      const isSchoolDegree = ['PSC', 'JSC', 'SSC', 'HSC'].includes(edu.degree);
 
       return (
         <div key={index} className="relative p-5 bg-slate-50 rounded-xl border border-slate-200 transition-all hover:border-blue-200 hover:shadow-md group">
@@ -477,14 +562,14 @@ const handleLogout = () => {
                 <div className="flex gap-2 p-1.5 bg-white border border-slate-200 rounded-lg w-fit">
                   <button
                     type="button"
-                    onClick={() => { setUniType('public'); handleEducationChange(index, {target: {name: 'institute', value: ''}}); }}
+                    onClick={() => { setUniType('public'); setUniSearchTerm(''); setFilteredUnis(publicUniData); handleEducationChange(index, {target: {name: 'institute', value: ''}}); }}
                     className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${uniType === 'public' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
                   >
                     Public
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setUniType('private'); handleEducationChange(index, {target: {name: 'institute', value: ''}}); }}
+                    onClick={() => { setUniType('private'); setUniSearchTerm(''); setFilteredUnis(privateUniData); handleEducationChange(index, {target: {name: 'institute', value: ''}}); }}
                     className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${uniType === 'private' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}
                   >
                     Private
@@ -493,19 +578,90 @@ const handleLogout = () => {
               </div>
             )}
 
-            {/* Institute Selection */}
-            <div className="md:col-span-2">
+            {/* Institute Selection with Search */}
+            <div className="md:col-span-2" ref={isSchoolDegree ? schoolDropdownRef : isUniDegree ? uniDropdownRef : null}>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Institute</label>
-              <select 
-                name="institute" 
-                value={edu.institute} 
-                disabled={!edu.degree} 
-                onChange={(e) => handleEducationChange(index, e)} 
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm ${!edu.degree ? 'bg-slate-100 cursor-not-allowed border-slate-200' : 'bg-white border-slate-200'}`}
-              >
-                <option value="">Select Institute</option>
-                {instituteList.map((name, i) => (<option key={i} value={name}>{name}</option>))}
-              </select>
+              
+              {isSchoolDegree && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={edu.institute || schoolSearchTerm}
+                    onChange={(e) => {
+                      setSchoolSearchTerm(e.target.value);
+                      setShowSchoolDropdown(true);
+                    }}
+                    onFocus={() => setShowSchoolDropdown(true)}
+                    disabled={!edu.degree}
+                    placeholder="Search school/college..."
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm ${!edu.degree ? 'bg-slate-100 cursor-not-allowed border-slate-200' : 'bg-white border-slate-200'}`}
+                  />
+                  {showSchoolDropdown && edu.degree && (
+                    <div className="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {filteredSchools.length > 0 ? (
+                        filteredSchools.map((school, i) => (
+                          <div
+                            key={i}
+                            onClick={() => handleInstituteSelect(index, school.name)}
+                            className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-slate-100 last:border-b-0"
+                          >
+                            {school.name}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-4 py-3 text-sm text-slate-500">No institutes found</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {isUniDegree && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={edu.institute || uniSearchTerm}
+                    onChange={(e) => {
+                      setUniSearchTerm(e.target.value);
+                      setShowUniDropdown(true);
+                    }}
+                    onFocus={() => setShowUniDropdown(true)}
+                    disabled={!edu.degree}
+                    placeholder="Search university..."
+                    className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm ${!edu.degree ? 'bg-slate-100 cursor-not-allowed border-slate-200' : 'bg-white border-slate-200'}`}
+                  />
+                  {showUniDropdown && edu.degree && (
+                    <div className="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {filteredUnis.length > 0 ? (
+                        filteredUnis.map((uni, i) => (
+                          <div
+                            key={i}
+                            onClick={() => handleInstituteSelect(index, uni.name)}
+                            className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-slate-100 last:border-b-0"
+                          >
+                            {uni.name}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-4 py-3 text-sm text-slate-500">No universities found</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {!isSchoolDegree && !isUniDegree && (
+                <select 
+                  name="institute" 
+                  value={edu.institute} 
+                  disabled={!edu.degree} 
+                  onChange={(e) => handleEducationChange(index, e)} 
+                  className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-sm ${!edu.degree ? 'bg-slate-100 cursor-not-allowed border-slate-200' : 'bg-white border-slate-200'}`}
+                >
+                  <option value="">Select Institute</option>
+                  {getInstitutesByDegree(edu.degree).map((name, i) => (<option key={i} value={name}>{name}</option>))}
+                </select>
+              )}
             </div>
           </div>
         </div>
@@ -606,13 +762,15 @@ const handleLogout = () => {
                     <div className="mt-6 flex flex-wrap gap-x-8 gap-y-2 text-sm text-[#555555]">
                       {formData.phone && <span className="flex items-center gap-1">📞 {formData.phone}</span>}
                       {formData.email && <span className="flex items-center gap-1">📧 {formData.email}</span>}
-                      {(formData.district || formData.division) && (
-                        <span className="flex items-center gap-1">
-                          📍 {formData.address && `${formData.address}, `}
-                          {getDistrictName() && `${getDistrictName()}, `}
-                          {getDivisionName()}
-                        </span>
-                      )}
+{(formData.upazila || formData.district || formData.division) && (
+  <span className="flex items-center gap-1">
+    📍 
+    {formData.address && `${formData.address}, `}
+    {getUpazilaName() && `${getUpazilaName()}, `}
+    {getDistrictName() && `${getDistrictName()}, `}
+    {getDivisionName()}
+  </span>
+)}
                     </div>
                   </div>
                   {/* Candidate Photo in Preview */}

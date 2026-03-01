@@ -27,8 +27,19 @@ exports.saveProfile = (req, res) => {
 exports.getProfile = (req, res) => {
   const userId = req.user.userId;
 
+  // Join users + candidate_profiles
   db.query(
-    'SELECT profile_data FROM candidate_profiles WHERE user_id = ?',
+    `
+    SELECT 
+      u.name,
+      u.phone,
+      u.email,
+      cp.profile_data
+    FROM users u
+    LEFT JOIN candidate_profiles cp 
+      ON u.id = cp.user_id
+    WHERE u.id = ?
+    `,
     [userId],
     (err, rows) => {
       if (err) {
@@ -37,11 +48,26 @@ exports.getProfile = (req, res) => {
       }
 
       if (!rows.length) {
-        // First-time user → no profile yet
         return res.json(null);
       }
 
-      res.json(JSON.parse(rows[0].profile_data));
+      const user = rows[0];
+
+      let profileData = {};
+
+      if (user.profile_data) {
+        profileData = JSON.parse(user.profile_data);
+      }
+
+      // 🔥 Merge registration data + profile data
+      const responseData = {
+        fullName: user.name,
+        phone: user.phone,
+        email: user.email,
+        ...profileData
+      };
+
+      res.json(responseData);
     }
   );
 };
