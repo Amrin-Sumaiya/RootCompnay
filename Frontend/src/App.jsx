@@ -27,6 +27,10 @@ import ProfessionalCourses from "./Pages/ProfessionalCourses.jsx";
 import CompanyTypes from "./Pages/company/CompanyTypes.jsx";
 import Universities from "./Pages/Universities.jsx";
 import Schools from "./Pages/Schools.jsx";
+import AdminArticleCreate from "./Pages/AdminArticleCreate.jsx";
+import CreatePackage from "./Pages/company/CreatePackage.jsx";
+import PackagesList from "./Pages/PackagesList.jsx";
+
 
 
 // ================= COMPANY DASHBOARD =================
@@ -38,6 +42,8 @@ import JobCandidates from "./Pages/company/JobCandidates.jsx";
 import UpdateJobPost from "./Pages/company/UpdateJobPost.jsx";
 import Companylogin from "./Pages/company/compnaylogin.jsx";
 import CompanyRegister from "./Pages/company/CompanyRegister.jsx";
+import CompanyPackages from "./Pages/company/CompanyPackages.jsx"
+
 
 const App = () => {
   return (
@@ -90,6 +96,9 @@ const App = () => {
   <Route path="company-types" element={<CompanyTypes />} />
   <Route path="universities" element={<Universities />} />
   <Route path="schools" element={<Schools />} />
+  <Route path="articles/create" element={<AdminArticleCreate />} />
+  <Route path="packages/create" element={<CreatePackage />} />
+  <Route path="packages" element={<PackagesList />} />
 </Route>
 
 
@@ -108,6 +117,7 @@ const App = () => {
           <Route path="jobs/create" element={<CreateJob />} />
           <Route path="jobs/edit/:id" element={<UpdateJobPost />} />
           <Route path="jobs/:jobId/candidates" element={<JobCandidates />} />
+          <Route path="packages" element={<CompanyPackages />} />
         </Route>
       </Routes>
     </Router>

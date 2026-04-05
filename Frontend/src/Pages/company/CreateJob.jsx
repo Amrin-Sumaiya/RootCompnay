@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from "../../api/axios";
+import { toast } from 'react-toastify';
 
 const CreateJob = () => {
   const navigate = useNavigate();
@@ -84,46 +85,69 @@ const handleVacationChange = (day) => {
     setForm({ ...form, [name]: value });
   };
 
-  const submitJob = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+ const submitJob = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      let experienceValue = "";
-
-      if (form.experienceFrom === "Fresher") {
-        experienceValue = "Fresher";
-      }
-      else if (form.experienceFrom && form.experienceTo) {
-        experienceValue = `${form.experienceFrom}-${form.experienceTo} Years`;
-      }
-      else if (form.experienceFrom) {
-        experienceValue = `${form.experienceFrom} Year${form.experienceFrom > 1 ? "s" : ""}`;
-      }
-
-      const qualificationValue = `${degree} - ${department}`;
-
-      const updatedForm = {
-        ...form,
-        WeeklyVacation: form.WeeklyVacation.join(', '),
-        Experience: experienceValue,
-        Qualifications: qualificationValue
-      };
-
-      await api.post('/jobs/jobs', updatedForm, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      navigate(`/company/jobs`);
-    } catch (err) {
-      console.error(err);
-      alert('Job creation failed');
-    } finally {
+  try {
+    // ✅ Validation
+    if (!form.JobTitle || !form.JobDescription || !form.JobType) {
+      toast.error("Please fill all required fields");
       setLoading(false);
+      return;
     }
-  };
+
+    let experienceValue = "";
+
+    if (form.experienceFrom === "Fresher") {
+      experienceValue = "Fresher";
+    } else if (form.experienceFrom && form.experienceTo) {
+      experienceValue = `${form.experienceFrom}-${form.experienceTo} Years`;
+    } else if (form.experienceFrom) {
+      experienceValue = `${form.experienceFrom} Year${form.experienceFrom > 1 ? "s" : ""}`;
+    }
+
+    const qualificationValue =
+      degree && department ? `${degree} - ${department}` : "";
+
+    const updatedForm = {
+      ...form,
+      WeeklyVacation: form.WeeklyVacation.join(', '),
+      Experience: experienceValue,
+      Qualifications: qualificationValue
+    };
+
+    await api.post('/jobs/jobs', updatedForm, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+
+    toast.success("Job created successfully 🎉");
+    navigate(`/company/jobs`);
+
+  } catch (err) {
+    console.error(err);
+
+    const message = err.response?.data?.message;
+
+    if (message === "No active package") {
+      toast.error("No package available. Please purchase a package first.");
+    } 
+    else if (message === "You have no package to post job") {
+      toast.error("You have no package to post job");
+    }
+    else if (message) {
+      toast.error(message);
+    } 
+    else {
+      toast.error("Job creation failed");
+    }
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Reusable Styling Classes
   const inputClass = "w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-green-500 focus:border-green-500 outline-none transition-all";
@@ -141,7 +165,7 @@ const handleVacationChange = (day) => {
           <div>
             <h2 className="text-xl font-bold text-white">Post a New Job</h2>
             <p className="text-green-100 text-sm">Find your next great hire.</p>
-          </div>
+          </div>  
           <button 
             type="button" 
             onClick={() => navigate(-1)}

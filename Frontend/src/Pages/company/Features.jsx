@@ -31,10 +31,10 @@ const Features = () => {
   ];
 
   return (
-    <section id="features" className="py-20 bg-white">
+    <section id="features" className="py-10 bg-gray-100">
       <div className="max-w-7xl mx-auto px-6 text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-green-800">
-          Powerful <span className="text-red-600">Features</span>
+          Our Special <span className="text-red-800">Features</span>
         </h2>
 
         <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">

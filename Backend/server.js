@@ -17,6 +17,8 @@ app.use('/api/job', require('./routes/jobApplication.routes'));
 app.use('/api/candidate-auth', require('./routes/candidate-auth.routes'));
 app.use('/api/common', require('./routes/common.routes'));
 app.use('/api/locations', require('./routes/location.routes'));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/api/articles', require('./routes/article.routes'));
 
 process.on("unhandledRejection", (err) => {
   console.error("UNHANDLED REJECTION:", err);

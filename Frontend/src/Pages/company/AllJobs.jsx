@@ -37,7 +37,7 @@ const AllJobs = () => {
     const [showSidebar, setShowSidebar] = useState(false); // Toggle for mobile filter
 
     const [currentPage, setCurrentPage] = useState(1);
-    const jobsPerPage = 3;
+    const jobsPerPage = 5;
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/immutability
@@ -143,7 +143,7 @@ const AllJobs = () => {
                         )}
 
 
-                        <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-200 space-y-6 h-full lg:h-auto overflow-y-auto">
+              <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-200 space-y-6 min-h-full overflow-y-auto">
                             <div className="flex lg:hidden justify-between items-center mb-4">
                                 <span className="font-bold">Filters</span>
                                 <button onClick={() => setShowSidebar(false)} className="p-2 text-gray-500 text-xl">✕</button>
@@ -192,7 +192,7 @@ const AllJobs = () => {
                             </div>
 
                             <div className="space-y-2">
-                                {['Category/Industry', 'Location', 'Posted/Deadline', 'Other Filters'].map((filter, idx) => (
+                                {['Category/Industry', 'Location', 'Posted/Deadline', 'Other Filters', 'Experience', 'Age'].map((filter, idx) => (
                                     <div key={idx} className="border-t border-gray-100 py-3 first:border-t-0">
                                         <button className="flex justify-between items-center w-full text-left group">
                                             <span className="text-sm font-medium text-slate-700 group-hover:text-green-900 transition-colors">{filter}</span>
@@ -203,7 +203,7 @@ const AllJobs = () => {
                             </div>
                             <button 
                                 onClick={() => setShowSidebar(false)}
-                                className="w-full mt-2 bg-gray-50 border border-green-900 text-green-900 font-medium py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-all shadow-sm"
+                                className="w-full mt-55 bg-gray-50 border border-green-900 text-green-900 font-medium py-2.5 rounded-lg hover:bg-green-900 hover:text-white transition-all shadow-sm"
                             >
                                 Clear Filters
                             </button>

@@ -33,6 +33,16 @@ const JobCandidates = () => {
     }
   };
 
+  const updateStatus = async (id, status) => {
+  try {
+    await api.put(`/job/applications/${id}/status`, { status });
+    fetchCandidates(); // refresh table
+  } catch (err) {
+    console.error(err);
+    alert("Failed to update status");
+  }
+};
+
   // --- React Table Configuration ---
   const columns = useMemo(() => [
     {
@@ -82,6 +92,50 @@ const JobCandidates = () => {
         </div>
       )
     },
+
+    {
+  header: "Status",
+  accessorKey: "status",
+  cell: ({ row }) => {
+    const status = row.original.status;
+
+    return (
+      <span className={`
+        px-2 py-1 rounded text-xs font-semibold capitalize
+        ${status === 'pending' && 'bg-yellow-100 text-yellow-700'}
+        ${status === 'accepted' && 'bg-green-100 text-green-700'}
+        ${status === 'rejected' && 'bg-red-100 text-red-700'}
+      `}>
+        {status}
+      </span>
+    );
+  }
+},
+
+{
+  header: "Action",
+  cell: ({ row }) => {
+    const id = row.original.id;
+
+    return (
+      <div className="flex gap-2">
+        <button
+          onClick={() => updateStatus(id, 'accepted')}
+          className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs"
+        >
+          Accept
+        </button>
+
+        <button
+          onClick={() => updateStatus(id, 'rejected')}
+          className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs"
+        >
+          Deny
+        </button>
+      </div>
+    );
+  }
+},
     {
       header: "CV / Resume",
       accessorKey: "cv",
@@ -100,7 +154,8 @@ const JobCandidates = () => {
         )
       )
     }
-  ], []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [fetchCandidates]);
 
   const table = useReactTable({
     data: candidates,

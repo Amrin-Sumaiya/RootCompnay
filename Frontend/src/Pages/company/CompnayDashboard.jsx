@@ -1,142 +1,230 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axios';
-// Adding icons to give the real "Dashboard" feel
-import { FaGlobe, FaCalendarAlt, FaBuilding, FaChartPie } from 'react-icons/fa';
+import { FaGlobe, FaCalendarAlt, FaBuilding, FaCloudUploadAlt, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 
 const CompanyDashboard = () => {
   const [company, setCompany] = useState(null);
+  const [logo, setLogo] = useState(null);
+  const [packages, setPackages] = useState([]);
+  const [uploading, setUploading] = useState(false);
+
+  const fetchDashboard = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await api.get('/company/dashboard', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data.FoundedDate) {
+        res.data.FoundedDate = res.data.FoundedDate.split('T')[0];
+      }
+      setCompany(res.data);
+    } catch (err) {
+      console.error('Error fetching company dashboard:', err);
+    }
+  };
+
+  const fetchPackages = async () => {
+    try {
+      const token = localStorage.getItem("token");
+     const res = await api.get("/company/my-packages", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPackages(res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await api.get('/company/dashboard', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        // Option 1: format date here before saving
-        if (res.data.FoundedDate) {
-          res.data.FoundedDate = res.data.FoundedDate.split('T')[0]; // "YYYY-MM-DD"
-        }
-
-        setCompany(res.data);
-      } catch (err) {
-        console.error('Error fetching company dashboard:', err);
-      }
-    };
-
     fetchDashboard();
+    fetchPackages();
   }, []);
+
+  const uploadLogo = async () => {
+    if (!logo) return;
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("logo", logo);
+    const token = localStorage.getItem("token");
+
+    try {
+      await api.post("/company/upload-logo", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        }
+      });
+      window.location.reload();
+    } catch (err) {
+      console.error("Upload failed", err);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (!company) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-            <p className="text-gray-500 font-medium">Loading Dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+          <p className="text-gray-500 font-medium tracking-wide">Loading your workspace...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-50/50 p-6 md:p-8 font-sans">
+    <div className="w-full min-h-screen bg-slate-50 p-4 md:p-10 font-sans text-slate-900">
       
-      {/* Dashboard Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      {/* --- HEADER --- */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-gray-800 tracking-tight">
-            Dashboard Overview
-          </h2>
-          <p className="text-gray-500 mt-1 flex items-center gap-2">
-            Welcome back, <span className="font-semibold text-indigo-600">{company.CompanyName}</span>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
+            Company Dashboard
+          </h1>
+          <p className="text-slate-500 mt-2 flex items-center gap-2">
+            Workspace for <span className="font-semibold text-indigo-600">{company.CompanyName}</span>
           </p>
         </div>
-        
-        {/* Optional Dashboard Action Button (Visual only) */}
-        <div className="hidden md:block">
-            <span className="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium shadow-sm">
-                {new Date().toDateString()}
-            </span>
+        <div className="flex items-center gap-3 bg-white p-2 px-4 rounded-xl shadow-sm border border-slate-200">
+           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+           <span className="text-sm font-medium text-slate-600">{new Date().toDateString()}</span>
         </div>
       </div>
 
-      {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Card 1: Company Name / Profile */}
-        <div className="bg-red-100 p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-indigo-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
-            
-            <div className="flex items-center justify-between relative z-10">
-                <div>
-                    <p className="text-sm font-semibold text-gray-800 uppercase tracking-wider">Organization</p>
-                    <h3 className="text-xl font-bold text-black mt-1 truncate">{company.CompanyName}</h3>
-                </div>
-                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                    <FaBuilding size={24} />
-                </div>
+        {/* --- LEFT COLUMN: INFO & UPLOAD --- */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-red-100 p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center mb-4">
+                <FaBuilding size={20} />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Organization</p>
+              <h3 className="text-lg font-bold text-slate-800 truncate">{company.CompanyName}</h3>
             </div>
-            <div className="mt-4 flex items-center text-xs text-green-600 ">
-                <span>● Active Status</span>
-            </div>
-        </div>
 
-        {/* Card 2: Website URL */}
-        <div className="bg-green-100  p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-blue-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
-            
-            <div className="flex items-center justify-between relative z-10">
-                <div className="overflow-hidden">
-                    <p className="text-sm font-semibold text-gray-800 uppercase tracking-wider">Website</p>
-                    <a 
-                        href={company.Company_URL} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="text-lg font-bold text-blue-600 hover:text-blue-800 hover:underline mt-1 block truncate transition-colors"
-                    >
-                        {company.Company_URL}
-                    </a>
-                </div>
-                <div className="p-3 bg-blue-50 text-blue-600 rounded-xl shrink-0 ml-4">
-                    <FaGlobe size={24} />
-                </div>
+            <div className="bg-green-100 p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-4">
+                <FaGlobe size={20} />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Website</p>
+              <a href={company.Company_URL} target="_blank" rel="noreferrer" className="text-indigo-600 font-semibold hover:underline block truncate">
+                {company.Company_URL?.replace(/(^\w+:|^)\/\//, '')}
+              </a>
             </div>
-             <div className="mt-4 text-xs text-gray-400">
-                Click link to visit portal
-            </div>
-        </div>
 
-        {/* Card 3: Founded Date */}
-        <div className="bg-purple-100  p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-orange-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
-            
-            <div className="flex items-center justify-between relative z-10">
-                <div>
-                    <p className="text-sm font-semibold text-gray-800 uppercase tracking-wider">Established</p>
-                    <h3 className="text-xl font-bold text-gray-800 mt-1">{company.FoundedDate}</h3>
-                </div>
-                <div className="p-3 bg-orange-50 text-orange-600 rounded-xl">
-                    <FaCalendarAlt size={24} />
-                </div>
+            <div className="bg-orange-100 p-6 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center mb-4">
+                <FaCalendarAlt size={20} />
+              </div>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Established</p>
+              <h3 className="text-lg font-bold text-slate-800">{company.FoundedDate}</h3>
             </div>
-             <div className="mt-4 text-xs text-gray-400">
-                Founding date record
-            </div>
-        </div>
-      </div>
-
-      {/* Decorative 'Analytics' Section (Visual Placeholder to complete Dashboard look) */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex flex-col items-center justify-center text-center">
-          <div className="bg-gray-50 p-4 rounded-full mb-3">
-             <FaChartPie className="text-gray-300 text-3xl" />
           </div>
-          <h3 className="text-gray-800 font-semibold">Activity Overview</h3>
-          <p className="text-gray-400 text-sm mt-1 max-w-md">
-            More detailed analytics and job performance metrics will appear here as your company activity grows.
-          </p>
-      </div>
 
+          {/* Packages Section */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-slate-800">Subscription Plans</h3>
+              <span className="text-xs font-bold py-1 px-3 bg-indigo-100 text-indigo-700 rounded-full">ACTIVE</span>
+            </div>
+            <div className="p-6">
+              {packages.length === 0 ? (
+                <div className="text-center py-10">
+                  <FaExclamationCircle className="mx-auto text-slate-300 mb-3" size={40} />
+                  <p className="text-slate-500">No active packages found.</p>
+                  <button className="mt-4 text-indigo-600 font-semibold">View Pricing</button>
+                </div>
+              ) : (
+                <div className="grid gap-6">
+                  {packages.map((pkg) => (
+                    <div key={pkg.id} className="relative p-5 rounded-xl border border-slate-100 bg-slate-50/50">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                        <div>
+                          <h4 className="text-lg font-bold text-indigo-900">{pkg.name}</h4>
+                          <p className="text-sm text-slate-500 italic">Renewal Status: {pkg.status}</p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-2xl font-black text-slate-800">${pkg.price}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Job Limit Progress Bar */}
+                      <div className="mt-2">
+                        <div className="flex justify-between text-xs font-bold mb-1 uppercase tracking-tighter">
+                          <span>Job Listings Used</span>
+                          <span>{pkg.job_limit - pkg.remaining_jobs} / {pkg.job_limit}</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2">
+                          <div 
+                            className="bg-indigo-600 h-2 rounded-full transition-all duration-500" 
+                            style={{ width: `${((pkg.job_limit - pkg.remaining_jobs) / pkg.job_limit) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* --- RIGHT COLUMN: BRANDING --- */}
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">Company Branding</h3>
+            
+            <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-xl p-8 bg-slate-50 group hover:border-indigo-300 transition-colors">
+              {company.Logo ? (
+                 <img src={company.Logo} alt="Logo" className="w-24 h-24 object-contain mb-4 rounded-lg shadow-sm" />
+              ) : (
+                <div className="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mb-4">
+                  <FaBuilding className="text-slate-400" size={30} />
+                </div>
+              )}
+              
+              <label className="cursor-pointer text-center">
+                <span className="block text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                  {logo ? logo.name : "Select new logo"}
+                </span>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  onChange={(e) => setLogo(e.target.files[0])} 
+                  accept="image/*"
+                />
+                <p className="text-xs text-slate-400 mt-1">PNG, JPG up to 2MB</p>
+              </label>
+
+              {logo && (
+                <button 
+                  onClick={uploadLogo}
+                  disabled={uploading}
+                  className="mt-6 w-full flex items-center justify-center gap-2 bg-indigo-600 text-white py-2 px-4 rounded-lg font-bold text-sm hover:bg-indigo-700 transition-all disabled:opacity-50"
+                >
+                  <FaCloudUploadAlt />
+                  {uploading ? "Uploading..." : "Confirm Upload"}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-indigo-900 rounded-2xl p-6 text-white shadow-xl shadow-indigo-200">
+             <h4 className="font-bold flex items-center gap-2 mb-2">
+               <FaCheckCircle className="text-emerald-400" /> Professional Tips
+             </h4>
+             <p className="text-indigo-100 text-sm leading-relaxed">
+               Keeping your profile updated increases visibility to top talent by up to 40%. Ensure your URL and logo are current.
+             </p>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 };

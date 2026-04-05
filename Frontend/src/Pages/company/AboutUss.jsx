@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const AboutUss = () => {
   return (
-    <div className="bg-white min-h-screen font-sans text-slate-800">
+    <div className="bg-gray-100 min-h-screen font-sans text-slate-800">
       
       {/* --- HERO SECTION --- */}
       <div className="relative bg-green-900 py-20 px-6 text-center text-white overflow-hidden">
@@ -70,7 +70,7 @@ const AboutUss = () => {
       </section>
 
       {/* --- CORE VALUES --- */}
-      <section className="bg-slate-50 py-20 px-6">
+      <section className="bg-gray-100 py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-green-800">Why Choose Us?</h2>

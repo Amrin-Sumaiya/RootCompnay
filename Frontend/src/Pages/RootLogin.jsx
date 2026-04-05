@@ -41,9 +41,9 @@ const RootLogin = () => {
       {/* Left Panel - Branding/Decorative (Hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 relative bg-slate-900 items-center justify-center overflow-hidden">
         {/* Subtle background gradients/blobs */}
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-emerald-900/40 to-slate-900 z-0"></div>
-        <div className="absolute w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-3xl -top-20 -left-20"></div>
-        <div className="absolute w-[400px] h-[400px] bg-teal-600/20 rounded-full blur-3xl bottom-10 right-10"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-linear-to-br from-emerald-900/40 to-slate-900 z-0"></div>
+        <div className="absolute w-125 h-125 bg-emerald-600/20 rounded-full blur-3xl -top-20 -left-20"></div>
+        <div className="absolute w-100 h-100 bg-teal-600/20 rounded-full blur-3xl bottom-10 right-10"></div>
         
         <div className="relative z-10 p-12 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 mb-6 backdrop-blur-sm">

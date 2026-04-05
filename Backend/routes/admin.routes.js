@@ -9,7 +9,8 @@ const {
   getAllCompanies,
   getOtpSettings, updateOtpSettings,
    createCompanyType, getCompanyTypes,
-   createUniversity, createSchool, getSchools, getUniversities
+   createUniversity, createSchool, getSchools,
+    getUniversities, createPackage, getPackages
 } = require('../controllers/admin.controller');
 
 router.post('/company', auth, role('root'), createCompanyWithUser);
@@ -32,5 +33,8 @@ router.post('/universities', auth, role('root'), createUniversity);
 router.post('/schools', auth, role('root'), createSchool);
 router.get('/universities', getUniversities);
 router.get('/schools', getSchools);
+router.post('/package', auth, role('root'), createPackage);
+// no role restriction, only auth
+router.get('/packages', auth, getPackages);
 
 module.exports = router;

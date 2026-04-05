@@ -34,9 +34,10 @@ exports.applyForJob = (req, res) => {
       job_id,
       job_title,
       company_name,
-      company_url
+      company_url,
+        status
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
   `;
 
   db.query(
@@ -72,8 +73,8 @@ exports.getCandidatesForJob = (req, res) => {
   const { jobId } = req.params;
 
   const sql = `
-    SELECT *
-    FROM job_applications
+    SELECT * 
+    FROM job_applications 
     WHERE job_id = ?
     ORDER BY created_at DESC
   `;
@@ -87,3 +88,42 @@ exports.getCandidatesForJob = (req, res) => {
     res.json(results);
   });
 };
+
+
+//update candidates status
+
+
+exports.updateApplicationStatus = (req, res) => {
+
+  const { applicationId } = req.params;
+  const { status } = req.body;
+
+  if (!['accepted', 'rejected'].includes(status)) {
+
+    return res.status(400).json({ message: 'Invalid Status'});
+  }
+
+  const sql = `
+   UPDATE job_applications
+   SET status = ?
+   WHERE id = ?
+  `;
+  db.query(sql, [status, applicationId], (err) => {
+    if (err) {
+      console.error('Update status error:', err);
+      return res.status(500).json({ message: 'Failed to update application status' });
+    }
+        res.json({ message: `Candidate ${status}` });
+  });
+};
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      

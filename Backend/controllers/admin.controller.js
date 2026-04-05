@@ -26,8 +26,8 @@ exports.createCompanyWithUser = (req, res) => {
 
       db.query(
         `
-        INSERT INTO company (CompanyName, Company_URL, FoundedDate, user_id)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO company (CompanyName, Company_URL, FoundedDate, user_id, role)
+        VALUES (?, ?, ?, ?, 'admin')
         `,
         [companyName, companyUrl, foundedDate || null, userId],
         (err) => {
@@ -222,6 +222,42 @@ exports.getSchools = (req, res) => {
       res.json(result);
     }
   );
+};
+
+//package create and offer create for compnay for buying package and creating 
+
+exports.createPackage = (req, res) => {
+  const {
+    name,
+    description,
+    benefits,
+    features,
+    price,
+    credit,
+    job_limit,
+    job_duration_days,
+    package_duration_days
+  } = req.body;
+
+db.query(
+    `INSERT INTO packages 
+    (name, description, benefits, features, price, credit, job_limit, job_duration_days, package_duration_days)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [name, description, benefits, features, price, credit, job_limit, job_duration_days, package_duration_days],
+    (err) => {
+      if (err) return res.status(500).json(err);
+
+      res.json({ message: "Package created successfully" });
+    }
+  );
+};
+
+// ================= GET ALL PACKAGES =================
+exports.getPackages = (req, res) => {
+  db.query("SELECT * FROM packages ORDER BY price ASC", (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result);
+  });
 };
 
 

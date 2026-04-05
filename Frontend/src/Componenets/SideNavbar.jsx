@@ -9,8 +9,10 @@ import {
   Building2,
   GraduationCap,
   Settings,
+  FileText,
   Briefcase,
   LogOut,
+  Package
 } from "lucide-react";
 import Logo from "../assets/igl.png";
 
@@ -120,6 +122,24 @@ const SideNavbar = () => {
           </Link>
 
           <Link
+  to="/admin/packages/create"
+  className={navItemClass("/admin/packages/create")}
+  onClick={() => setMobileOpen(false)}
+>
+  <Briefcase size={22} />
+  {!collapsed && <span>Create Package</span>}
+</Link>
+
+<Link
+  to="/admin/packages"
+  className={navItemClass("/admin/packages")}
+  onClick={() => setMobileOpen(false)}
+>
+  <Package size={22} />
+  {!collapsed && <span>Get Package Offer</span>}
+</Link>
+
+          <Link
             to="/admin/otp-settings"
             className={navItemClass("/admin/otp-settings")}
             onClick={() => setMobileOpen(false)}
@@ -155,6 +175,16 @@ const SideNavbar = () => {
 >
   <Building2 size={22} />
   {!collapsed && <span>Schools</span>}
+</Link>
+
+
+<Link
+  to="/admin/articles/create"
+  className={navItemClass("/admin/articles")}
+  onClick={() => setMobileOpen(false)}
+>
+  <FileText size={22} />
+  {!collapsed && <span>Articles</span>}
 </Link>
         </nav>
 

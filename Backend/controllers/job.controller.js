@@ -23,59 +23,109 @@ exports.createJob = (req, res) => {
     Currency
   } = req.body;
 
-  const { companyId, companyUrl } = req.user;
+  const { companyId } = req.user;
 
   if (!companyId) {
     return res.status(403).json({ message: 'Unauthorized company' });
   }
 
-  const slug = JobTitle
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-
-  // const jobLink = `/${companyUrl}/${slug}`;
-
-const sql = `
-  INSERT INTO jobs (
-    CompanyID, JobTitle, JobSlug,
-    JobDescription, JobResponsibilities, Qualifications, Skills,
-    JobType, WeeklyVacation, Benefits, Experience, JobLocation,
-    Address, Country, State, City,
-    SalaryFrom, SalaryTo, SalaryType, Currency
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-`;
-
+  // ✅ STEP 1: CHECK ACTIVE PACKAGE
 db.query(
-  sql,
-  [
-    companyId,
-    JobTitle,
-    slug,
-    JobDescription,
-    JobResponsibilities,
-    Qualifications,
-    Skills,
-    JobType,
-    WeeklyVacation,
-    Benefits,
-    Experience,
-    JobLocation,
-    Address,
-    Country,
-    State,
-    City,
-    SalaryFrom,
-    SalaryTo,
-    SalaryType,
-    Currency
-  ],
-  (err) => {
-    if (err) return res.status(500).json(err);
-    res.status(201).json({ message: 'Job created successfully' });
-  }
+  `SELECT * FROM company_packages
+   WHERE company_id = ?
+   AND status = 'active'
+   AND end_date > NOW()
+   AND remaining_jobs > 0
+   ORDER BY id ASC
+   LIMIT 1`,
+  [companyId],
+    (err, pkgResult) => {
+      console.log("Package Query Result:", pkgResult);
+      console.log("Company ID for Job Creation:", companyId);
+      if (err) return res.status(500).json(err);
+
+      if (!pkgResult.length) {
+        return res.status(400).json({ message: "No active package" });
+      }
+
+      
+
+const pkg = pkgResult[0];
+
+if (!pkg || pkg.remaining_jobs <= 0) {
+  return res.status(400).json({ 
+    message: "You have no package to post job" 
+  });
+}
+
+console.log("Company ID:", companyId);
+
+
+      // ✅ STEP 3: CREATE SLUG
+      const slug = JobTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      // ✅ STEP 4: SET EXPIRY DATE (FROM PACKAGE)
+    const expiresAt = pkg.end_date;
+
+      const sql = `
+        INSERT INTO jobs (
+          CompanyID, JobTitle, JobSlug,
+          JobDescription, JobResponsibilities, Qualifications, Skills,
+          JobType, WeeklyVacation, Benefits, Experience, JobLocation,
+          Address, Country, State, City,
+          SalaryFrom, SalaryTo, SalaryType, Currency,
+          expires_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      db.query(
+        sql,
+        [
+          companyId,
+          JobTitle,
+          slug,
+          JobDescription,
+          JobResponsibilities,
+          Qualifications,
+          Skills,
+          JobType,
+          WeeklyVacation,
+          Benefits,
+          Experience,
+          JobLocation,
+          Address,
+          Country,
+          State,
+          City,
+          SalaryFrom,
+          SalaryTo,
+          SalaryType,
+          Currency,
+          expiresAt
+        ],
+        (err) => {
+          if (err) return res.status(500).json(err);
+
+          // ✅ STEP 5: DECREASE REMAINING JOBS
+db.query(
+  `UPDATE company_packages
+   SET remaining_jobs = remaining_jobs - 1
+   WHERE company_id = ?
+   AND status = 'active'
+   AND remaining_jobs > 0
+   ORDER BY id ASC
+   LIMIT 1`,
+  [companyId]
 );
 
+          res.status(201).json({ message: 'Job created successfully' });
+        }
+      );
+    }
+  );
 };
 
 // ================= GET COMPANY JOBS =================
@@ -83,7 +133,16 @@ exports.getCompanyJobs = (req, res) => {
   const { companyId } = req.user;
 
   db.query(
-    'SELECT * FROM jobs WHERE CompanyID = ? ORDER BY CreatedAt DESC',
+    `
+    SELECT *,
+    CASE 
+      WHEN expires_at < NOW() THEN 'expired'
+      ELSE 'active'
+    END AS job_status
+    FROM jobs 
+    WHERE CompanyID = ?
+    ORDER BY CreatedAt DESC
+    `,
     [companyId],
     (err, result) => {
       if (err) return res.status(500).json(err);
@@ -217,8 +276,9 @@ exports.getAllJobs = (req, res) => {
       company.Company_URL
     FROM jobs
     LEFT JOIN company ON jobs.CompanyID = company.CompanyID
-    WHERE company.Company_URL IS NOT NULL
-    ORDER BY jobs.CreatedAt DESC
+   WHERE company.Company_URL IS NOT NULL
+AND jobs.status = 'active'
+AND jobs.expires_at > NOW()
   `;
 
   db.query(sql, (err, results) => {
@@ -228,29 +288,51 @@ exports.getAllJobs = (req, res) => {
 };
 
 
-// // ================= GET ALL JOBS (PUBLIC) =================
-// exports.getAllJobs = (req, res) => {
 
-  
-//   // UPDATE: We use JOIN to get the CompanyName from the company table
-//   const sql = `
-//     SELECT 
-//       jobs.*, 
-//       company.CompanyName, 
-//       company.Company_URL
-//     FROM jobs 
-//     JOIN company ON jobs.CompanyID = company.CompanyID 
-//     ORDER BY jobs.CreatedAt DESC
-//   `;
+exports.getPublicCompaniesWithJobs = (req, res) => {
 
-//   db.query(sql, (err, results) => {
-//     if (err) return res.status(500).json(err);
-//     res.json(results);
+  const sql = `
+    SELECT 
+      c.CompanyID,
+      c.CompanyName,
+      c.Company_URL,
+      c.logo,
+      j.JobID,
+      j.JobTitle,
+      j.JobSlug
+    FROM company c
+    LEFT JOIN jobs j ON c.CompanyID = j.CompanyID
+    ORDER BY c.CompanyName
+  `;
 
-//   });
-   
-// };
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json(err);
 
+    const companies = {};
+
+    results.forEach(row => {
+      if (!companies[row.CompanyID]) {
+        companies[row.CompanyID] = {
+          CompanyID: row.CompanyID,
+          CompanyName: row.CompanyName,
+          Company_URL: row.Company_URL,
+          logo: row.logo,
+          jobs: []
+        };
+      }
+
+      if (row.JobID) {
+        companies[row.CompanyID].jobs.push({
+          JobID: row.JobID,
+          JobTitle: row.JobTitle,
+          JobSlug: row.JobSlug
+        });
+      }
+    });
+
+    res.json(Object.values(companies));
+  });
+};
  
 
 
@@ -265,17 +347,19 @@ exports.getPublicJobDetails = (req, res) => {
   const cleanUrl = companyUrl.replace(/^\//, "");
   const slashUrl = `/${cleanUrl}`;
 
-  const sql = `
-    SELECT 
-      jobs.*,
-      company.CompanyName,
-      company.Company_URL
-    FROM jobs
-    JOIN company ON jobs.CompanyID = company.CompanyID
-    WHERE (company.Company_URL = ? OR company.Company_URL = ?)
-      AND jobs.JobSlug = ?
-    LIMIT 1
-  `;
+const sql = `
+  SELECT 
+    jobs.*,
+    company.CompanyName,
+    company.Company_URL
+  FROM jobs
+  JOIN company ON jobs.CompanyID = company.CompanyID
+  WHERE (company.Company_URL = ? OR company.Company_URL = ?)
+    AND jobs.JobSlug = ?
+    AND jobs.status = 'active'
+    AND jobs.expires_at > NOW()
+  LIMIT 1
+`;
 
   db.query(sql, [cleanUrl, slashUrl, jobSlug], (err, result) => {
     if (err) {
@@ -302,6 +386,19 @@ exports.getCompanyTypes = (req, res) => {
   );
 };
 
+
+// ================= GET JOB STATS =================
+exports.getJobStats = (req, res) => {
+  const sql = `
+    SELECT COUNT(*) AS totalJobs
+    FROM jobs
+  `;
+
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result[0]);
+  });
+};
 
 
 

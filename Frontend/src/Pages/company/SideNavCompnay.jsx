@@ -20,6 +20,7 @@ const SideNavbarCompany = () => {
   const navItems = [
     { name: "Dashboard", path: `/company/${companyUrl}/dashboard`, icon: <FaTachometerAlt /> },
     { name: "Jobs", path: `/company/${companyUrl}/jobs`, icon: <FaBriefcase /> },
+    { name: "Packages", path: `/company/${companyUrl}/packages`, icon: <FaBriefcase /> },
   ];
 
   return (

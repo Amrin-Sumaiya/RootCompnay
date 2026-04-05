@@ -19,11 +19,9 @@ const CompanyLogin = () => {
       // Save token
     localStorage.setItem('token', res.data.token);
 localStorage.setItem('role', 1);                 // ✅ ADD THIS LINE
-localStorage.setItem('companyUrl', res.data.companyURL); // ✅ ADD THIS LINE
+localStorage.setItem('companyUrl', res.data.companyUrl);
 
-
-      // Redirect to company dashboard
-     const companyUrl = res.data.companyrl; // Make sure backend sends this
+const companyUrl = res.data.companyUrl; // Make sure backend sends this
       navigate(`/company/${companyUrl}/dashboard`);
     } catch (err) {
       console.error(err);

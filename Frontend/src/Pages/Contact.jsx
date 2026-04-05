@@ -29,14 +29,14 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-green-50">
+    <section id="contact" className="py-9 bg-gray-300">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Title */}
         <div className="text-center mb-14">
-          <h2 className="text-3xl md:text-4xl font-bold text-green-800">
+          <h2 className="text-3xl md:text-4xl font-bold text-green-600">
             Get in <span className="text-red-600">Touch</span>
           </h2>
-          <p className="mt-4 text-gray-600 max-w-xl mx-auto">
+          <p className="mt-4 text-gray-800 max-w-xl mx-auto">
             {contactData.paragraph}
           </p>
         </div>
