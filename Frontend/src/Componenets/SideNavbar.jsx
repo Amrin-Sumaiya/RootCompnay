@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+
 import {
   Menu,
   X,
@@ -12,7 +13,8 @@ import {
   FileText,
   Briefcase,
   LogOut,
-  Package
+  Package,
+  Wallet
 } from "lucide-react";
 import Logo from "../assets/igl.png";
 
@@ -24,7 +26,7 @@ const SideNavbar = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   // Active route checker (supports nested routes)
-  const isActive = (path) => location.pathname.startsWith(path);
+  const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -110,6 +112,17 @@ const SideNavbar = () => {
           >
             <Building2 size={22} />
             {!collapsed && <span>Company List</span>}
+          </Link>
+
+
+
+          <Link
+          to="/admin/balance"
+          className={navItemClass("/admin/balance")}
+          >
+            <Wallet size={22} />
+            {!collapsed && <span>Company Balance</span>}
+          
           </Link>
 
           <Link

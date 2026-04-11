@@ -15,6 +15,7 @@ const Header = () => {
     totalCandidates: 0
   });
 
+
   useEffect(() => {
     if (searchTerm.length < 3) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -33,6 +34,7 @@ const Header = () => {
         .catch(err => console.error(err));
     }, 400);
 
+    
     return () => clearTimeout(delayDebounce);
   }, [searchTerm]);
 
@@ -71,38 +73,24 @@ const Header = () => {
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-900/90 via-green-900/80 to-gray-900/90"></div>
+        <div className="absolute inset-0 bg-linear-to-b from-gray-900/90 via-green-900/80 to-gray-900/90"></div>
       </div>
 
       {/* 2. Main Content */}
       <div className="relative z-10 w-full max-w-5xl px-6 text-center pt-10">
 
+        <br />
+
         {/* Badge */}
-        <div className="inline-block px-4 py-1 mb-6 border border-blue-400/30 rounded-full bg-blue-500/10 backdrop-blur-sm">
-          <span className="text-blue-200 text-sm font-semibold tracking-wide uppercase">
-            #1 Job Portal Platform
-          </span>
-        </div>
 
-        {/* Headline */}
-        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
-          Let's Find Your <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
-            Dream Job
-          </span>
-        </h1>
+     {/* Search Bar */}
+        <div className="bg-white p-1 rounded-full shadow-2xl max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-1 transform transition-all hover:scale-[1.01] relative">
 
-        <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto font-light">
-          Connecting the world's best talent with top-tier companies.
-          Start your career journey today.
-        </p>
-
-        {/* Search Bar */}
-        <div className="bg-white p-2 rounded-full shadow-2xl max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-2 transform transition-all hover:scale-[1.01] relative">
+          <br />
           
           {/* Job Title Input with Integrated Suggestions */}
           <div className="relative flex items-center w-full md:w-5/12 px-6 py-3 border-b md:border-b-0 md:border-r border-gray-100">
-            <Search className="text-blue-500 mr-3 flex-shrink-0" size={22} />
+            <Search className="text-blue-500 mr-3 shrink-0" size={22} />
             <input
               type="text"
               placeholder="Job title, skills, or company"
@@ -115,6 +103,7 @@ const Header = () => {
                 setTimeout(() => setShowSuggestions(false), 200);
               }}
             />
+
 
             {/* Suggestions Dropdown - Perfectly Positioned */}
             {showSuggestions && suggestions.length > 0 && (
@@ -145,7 +134,7 @@ const Header = () => {
 
           {/* Location Input */}
           <div className="flex items-center w-full md:w-4/12 px-6 py-3">
-            <MapPin className="text-blue-500 mr-3 flex-shrink-0" size={22} />
+            <MapPin className="text-blue-500 mr-3 shrink-0" size={22} />
             <input
               type="text"
               placeholder="City, State, or Zip"
@@ -162,10 +151,30 @@ const Header = () => {
             </button>
           </div>
         </div>
+
+        <br />
+
+        <br />
+        <br />
+     
+        {/* Headline */}
+        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight tracking-tight">
+          Let's Find Your <br />
+          <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-300">
+            Dream Job
+          </span>
+        </h1>
+
+        <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto font-light">
+          Connecting the world's best talent with top-tier companies.
+          Start your career journey today.
+        </p>
+
+   
       </div>
 
       {/* 3. Stats Cards */}
-      <div className="relative z-10 w-full max-w-6xl pb-4 mt-10 md:mt-35">
+      <div className="relative z-10 w-full max-w-6xl pb-4 mt-10 md:mt-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* Card 1: Companies */}
@@ -193,6 +202,7 @@ const Header = () => {
               <p className="text-xs text-gray-400 mt-1">Posted By Various Companies</p>
             </div>
           </div>
+
 
           {/* Card 3: Candidates */}
           <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-2xl flex items-center gap-5 hover:bg-white/15 transition-all duration-300 group">

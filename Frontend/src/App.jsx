@@ -30,6 +30,7 @@ import Schools from "./Pages/Schools.jsx";
 import AdminArticleCreate from "./Pages/AdminArticleCreate.jsx";
 import CreatePackage from "./Pages/company/CreatePackage.jsx";
 import PackagesList from "./Pages/PackagesList.jsx";
+import AdminBalance from "./Pages/AdminBalance.jsx";
 
 
 
@@ -51,7 +52,7 @@ const App = () => {
       <Routes>
         {/* ================= PUBLIC ROUTES ================= */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home />} /> 
           <Route path="/aboutpage" element={<AboutUss />} />
           <Route path="/admin/login" element={<RootLogin />} />
           <Route path="/company/login" element={<Companylogin />} />
@@ -87,7 +88,7 @@ const App = () => {
       <AdminLayout />
     </AuthGuard>
   }
->
+> 
   <Route path="dashboard" element={<Dashboard />} />
   <Route path="create" element={<Create />} />
   <Route path="read" element={<Read />} />
@@ -99,6 +100,7 @@ const App = () => {
   <Route path="articles/create" element={<AdminArticleCreate />} />
   <Route path="packages/create" element={<CreatePackage />} />
   <Route path="packages" element={<PackagesList />} />
+  <Route path="balance" element={<AdminBalance />} />
 </Route>
 
 
