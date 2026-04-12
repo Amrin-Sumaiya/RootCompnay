@@ -300,7 +300,7 @@ exports.getDashboard = (req, res) => {
 
       // ✅ FIX 1: convert logo → full URL
       if (company.logo) {
-        company.Logo = `http://localhost:5000${company.logo}`;
+        company.Logo = `http://localhost:5000/${company.logo}`;
       } else {
         company.Logo = null;
       }

@@ -164,7 +164,7 @@ const About = () => {
               <div className="shrink-0 w-14 h-14 rounded-2xl overflow-hidden bg-white flex items-center justify-center">
                 {selectedCompany?.logo ? (
                   <img
-                    src={`https://localhost:5000${selectedCompany.logo}`}
+                    src={`http://localhost:5000${selectedCompany.logo}`}
                     alt={selectedCompany.CompanyName}
                     className="w-full h-full object-cover"
                   />

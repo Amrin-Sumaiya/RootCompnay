@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { toast } from "react-toastify"; // npm install react-toastify
 
 const CompanyPackages = () => {
   const [packages, setPackages] = useState([]);
@@ -16,6 +17,9 @@ const CompanyPackages = () => {
     }
   };
 
+
+  
+
   const buyPackage = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -24,9 +28,9 @@ const CompanyPackages = () => {
         { packageId: id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert(res.data.message);
+      toast.success(res.data.message);
     } catch (err) {
-      alert(err.response?.data?.message || "Purchase failed");
+      toast.error(err.response?.data?.message || "Purchase failed");
     }
   };
 

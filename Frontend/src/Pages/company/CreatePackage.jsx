@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import api from "../../api/axios";
 import { Package, DollarSign, List, FileText, Zap, Calendar, CreditCard } from "lucide-react"; // npm install lucide-react
+import { toast } from "react-toastify"; // npm install react-toastify
 
 const CreatePackage = () => {
   const [formData, setFormData] = useState({
@@ -26,14 +27,14 @@ const CreatePackage = () => {
     setLoading(true);
     try {
       const res = await api.post("/admin/package", formData);
-      alert(res.data.message);
+      toast.success(res.data.message);
       setFormData({
         name: "", description: "", benefits: "", features: "",
         price: "", credit: "", job_limit: "", job_duration_days: "", package_duration_days: "",
       });
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Error creating package");
+      toast.error(err.response?.data?.message || "Error creating package");
     } finally {
       setLoading(false);
     }
