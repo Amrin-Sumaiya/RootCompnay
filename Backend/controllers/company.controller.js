@@ -126,14 +126,17 @@ exports.sendOTP = async (req, res) => {
 // =====================================================
 exports.verifyOTPAndRegister = async (req, res) => {
   const {
-    email,
-    phone,
-    emailOTP,
-    phoneOTP,
-    companyName,
-    personName,
-    companyType,
-    password
+  email,
+  phone,
+  emailOTP,
+  phoneOTP,
+  companyName,
+  personName,
+  companyType,
+  password,
+  Address,
+  City,
+  State
   } = req.body;
 
   if (!email || !phone || !password || !companyName || !personName) {
@@ -194,8 +197,17 @@ exports.verifyOTPAndRegister = async (req, res) => {
     // ===== INSERT COMPANY =====
     const companyResult = await new Promise((resolve, reject) => {
       db.query(
-        "INSERT INTO company (user_id, CompanyName, Person_Name, Phone, Company_URL) VALUES (?, ?, ?, ?, ?)",
-        [userId, companyName, personName, phone, companyUrl],
+        "INSERT INTO company (user_id, CompanyName, Person_Name, Phone, Company_URL, Address, City, State) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+  userId,
+  companyName,
+  personName,
+  phone,
+  companyUrl,
+  Address,
+  City,
+  State
+],
         (err, result) => (err ? reject(err) : resolve(result))
       );
     });

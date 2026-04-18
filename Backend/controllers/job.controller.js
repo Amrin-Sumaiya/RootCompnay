@@ -1,5 +1,3 @@
-const db = require('../db');
-
 // ================= CREATE JOB =================
 exports.createJob = (req, res) => {
   const {
@@ -13,10 +11,10 @@ exports.createJob = (req, res) => {
     Benefits,
     Experience,
     JobLocation,
-    Address,
+    Address, // Added back to destructuring so it can be optional
     Country,
-    State,
-    City,
+    State,   // Added back to destructuring so it can be optional
+    City,    // Added back to destructuring so it can be optional
     SalaryFrom,
     SalaryTo,
     SalaryType,
@@ -24,104 +22,111 @@ exports.createJob = (req, res) => {
   } = req.body;
 
   const { companyId } = req.user;
+  
+  if (!JobTitle || !JobDescription || !JobType) {
+    return res.status(400).json({ message: "Required fields missing" });
+  }
 
   if (!companyId) {
     return res.status(403).json({ message: 'Unauthorized company' });
   }
 
-  // ✅ STEP 1: CHECK ACTIVE PACKAGE
-db.query(
-  `SELECT * FROM company_packages
-   WHERE company_id = ?
-   AND status = 'active'
-   AND end_date > NOW()
-   AND remaining_jobs > 0
-   ORDER BY id ASC
-   LIMIT 1`,
-  [companyId],
-    (err, pkgResult) => {
-      console.log("Package Query Result:", pkgResult);
-      console.log("Company ID for Job Creation:", companyId);
+  // ✅ STEP 1: FETCH COMPANY DATA
+  db.query(
+    "SELECT Address, City, State FROM company WHERE CompanyID = ?",
+    [companyId],
+    (err, companyResult) => {
       if (err) return res.status(500).json(err);
-
-      if (!pkgResult.length) {
-        return res.status(400).json({ message: "No active package" });
+      if (!companyResult.length) {
+        return res.status(404).json({ message: "Company not found" });
       }
 
-      
+      const companyData = companyResult[0];
 
-const pkg = pkgResult[0];
+      // Use request body value if provided, otherwise fallback to company database record
+      const finalAddress = Address || companyData.Address;
+      const finalCity = City || companyData.City;
+      const finalState = State || companyData.State;
 
-if (!pkg || pkg.remaining_jobs <= 0) {
-  return res.status(400).json({ 
-    message: "You have no package to post job" 
-  });
-}
-
-console.log("Company ID:", companyId);
-
-
-      // ✅ STEP 3: CREATE SLUG
-      const slug = JobTitle
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-
-      // ✅ STEP 4: SET EXPIRY DATE (FROM PACKAGE)
-    const expiresAt = pkg.end_date;
-
-      const sql = `
-        INSERT INTO jobs (
-          CompanyID, JobTitle, JobSlug,
-          JobDescription, JobResponsibilities, Qualifications, Skills,
-          JobType, WeeklyVacation, Benefits, Experience, JobLocation,
-          Address, Country, State, City,
-          SalaryFrom, SalaryTo, SalaryType, Currency,
-          expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
+      // ✅ STEP 2: CHECK ACTIVE PACKAGE
       db.query(
-        sql,
-        [
-          companyId,
-          JobTitle,
-          slug,
-          JobDescription,
-          JobResponsibilities,
-          Qualifications,
-          Skills,
-          JobType,
-          WeeklyVacation,
-          Benefits,
-          Experience,
-          JobLocation,
-          Address,
-          Country,
-          State,
-          City,
-          SalaryFrom,
-          SalaryTo,
-          SalaryType,
-          Currency,
-          expiresAt
-        ],
-        (err) => {
+        `SELECT * FROM company_packages
+         WHERE company_id = ?
+         AND status = 'active'
+         AND end_date > NOW()
+         AND remaining_jobs > 0
+         ORDER BY id ASC
+         LIMIT 1`,
+        [companyId],
+        (err, pkgResult) => {
           if (err) return res.status(500).json(err);
 
-          // ✅ STEP 5: DECREASE REMAINING JOBS
-db.query(
-  `UPDATE company_packages
-   SET remaining_jobs = remaining_jobs - 1
-   WHERE company_id = ?
-   AND status = 'active'
-   AND remaining_jobs > 0
-   ORDER BY id ASC
-   LIMIT 1`,
-  [companyId]
-);
+          if (!pkgResult.length) {
+            return res.status(400).json({ message: "No active package" });
+          }
 
-          res.status(201).json({ message: 'Job created successfully' });
+          const pkg = pkgResult[0];
+          const slug = JobTitle
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+
+          const expiresAt = pkg.end_date;
+
+          const sql = `
+            INSERT INTO jobs (
+              CompanyID, JobTitle, JobSlug,
+              JobDescription, JobResponsibilities, Qualifications, Skills,
+              JobType, WeeklyVacation, Benefits, Experience, JobLocation,
+              Address, Country, State, City,
+              SalaryFrom, SalaryTo, SalaryType, Currency,
+              expires_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `;
+
+          db.query(
+            sql,
+            [
+              companyId,
+              JobTitle,
+              slug,
+              JobDescription,
+              JobResponsibilities,
+              Qualifications,
+              Skills,
+              JobType,
+              WeeklyVacation,
+              Benefits,
+              Experience,
+              JobLocation,
+              finalAddress, // Using the calculated value
+              Country,
+              finalState,   // Using the calculated value
+              finalCity,    // Using the calculated value
+              SalaryFrom,
+              SalaryTo,
+              SalaryType,
+              Currency,
+              expiresAt
+            ],
+            (err) => {
+              if (err) return res.status(500).json(err);
+
+              // ✅ STEP 3: DECREASE REMAINING JOBS
+              db.query(
+                `UPDATE company_packages
+                 SET remaining_jobs = remaining_jobs - 1
+                 WHERE company_id = ?
+                 AND status = 'active'
+                 AND remaining_jobs > 0
+                 ORDER BY id ASC
+                 LIMIT 1`,
+                [companyId]
+              );
+
+              res.status(201).json({ message: 'Job created successfully' });
+            }
+          );
         }
       );
     }
@@ -168,9 +173,6 @@ exports.updateJob = (req, res) => {
     Benefits,
     Experience,
     JobLocation,
-    Address,
-    Country,
-    State,
     City,
     SalaryFrom,
     SalaryTo,

@@ -251,7 +251,7 @@ db.query(
 
       res.json({ message: "Package created successfully" });
     }
-  );
+  );  
 };
 
 // ================= GET ALL PACKAGES =================

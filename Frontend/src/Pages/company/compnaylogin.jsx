@@ -38,7 +38,7 @@ const companyUrl = res.data.companyUrl; // Make sure backend sends this
         
         {/* Header */}
         <div className="mb-10 text-center">
-          <div className="mx-auto w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-4">
+          <div className="mx-auto w-12 h-12 bg-green-700 rounded-lg flex items-center justify-center mb-4">
             <span className="text-white font-bold text-2xl">C</span>
           </div>
           <h2 className="text-2xl font-bold text-slate-800">Company Login</h2>
@@ -94,7 +94,7 @@ const companyUrl = res.data.companyUrl; // Make sure backend sends this
           {/* Login Button */}
           <button 
             type="submit" 
-            className="w-full bg-green-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-[0.98]"
+            className="w-full bg-green-700 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-[0.98]"
             disabled={loading}
           >
             {loading ? 'Logging in...' : 'Login'}
