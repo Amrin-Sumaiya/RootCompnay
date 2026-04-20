@@ -9,6 +9,7 @@ const CompanyRegister = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [companyTypes, setCompanyTypes] = useState([]);
+  const [phoneError, setPhoneError] = useState(""); // Added state for validation
   
   useEffect(() => {
     const fetchTypes = async () => {
@@ -37,11 +38,28 @@ const CompanyRegister = () => {
   const [otpData, setOtpData] = useState({ emailOTP: "", phoneOTP: "" });
   const [otpSettings, setOtpSettings] = useState({ emailOTPEnabled: true, phoneOTPEnabled: true });
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Validation logic for phone
+    if (name === "phone") {
+      if (value.length > 0 && (value.length !== 11 || !/^\d+$/.test(value))) {
+        setPhoneError("Phone number must be exactly 11 digits.");
+      } else {
+        setPhoneError("");
+      }
+    }
+  };
+
   const handleOtpChange = (e) => setOtpData({ ...otpData, [e.target.name]: e.target.value });
 
   const sendOTP = async (e) => {
     e.preventDefault();
+    if (formData.phone.length !== 11) {
+      setPhoneError("Phone number must be exactly 11 digits.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await api.post("/company/send-otp", { email: formData.email, phone: formData.phone });
@@ -50,7 +68,6 @@ const CompanyRegister = () => {
         phoneOTPEnabled: res.data.phoneOTPEnabled ?? true
       });
       setStep(2);
-      if (!res.data.emailOTPEnabled && !res.data.phoneOTPEnabled) ;
     } catch (err) {
       alert(err.response?.data?.message || "Failed to send OTP");
     } finally {
@@ -108,11 +125,11 @@ const CompanyRegister = () => {
         <div className="flex-1 p-8 md:p-12 lg:p-16">
           <div className="flex items-center justify-center mb-10">
              <div className="flex items-center space-x-4">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold ${step === 1 ? 'bg-indigo-600 text-white' : 'bg-emerald-500 text-white'}`}>
-                  {step > 1 ? <CheckCircle2 size={20}/> : "1"}
-                </div>
-                <div className="w-12 h-0.5 bg-slate-200"></div>
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold ${step === 2 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-400'}`}>2</div>
+               <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold ${step === 1 ? 'bg-indigo-600 text-white' : 'bg-emerald-500 text-white'}`}>
+                 {step > 1 ? <CheckCircle2 size={20}/> : "1"}
+               </div>
+               <div className="w-12 h-0.5 bg-slate-200"></div>
+               <div className={`flex items-center justify-center w-10 h-10 rounded-full font-bold ${step === 2 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-400'}`}>2</div>
              </div>
           </div>
 
@@ -126,7 +143,10 @@ const CompanyRegister = () => {
           {step === 1 && (
             <form onSubmit={sendOTP} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputGroup icon={<Phone size={18}/>} name="phone" value={formData.phone} placeholder="Phone Number" onChange={handleChange} required />
+                <div className="md:col-span-2">
+                  <InputGroup icon={<Phone size={18}/>} name="phone" value={formData.phone} placeholder="Phone Number (11 digits)" onChange={handleChange} required />
+                  {phoneError && <p className="text-red-500 text-xs mt-1 ml-2">{phoneError}</p>}
+                </div>
                 <InputGroup icon={<Mail size={18}/>} type="email" name="email" value={formData.email} placeholder="Business Email" onChange={handleChange} required />
                 <InputGroup icon={<Building2 size={18}/>} name="companyName" value={formData.companyName} placeholder="Company Name" onChange={handleChange} required />
                 <InputGroup icon={<User size={18}/>} name="personName" value={formData.personName} placeholder="Contact Person" onChange={handleChange} required />
@@ -147,7 +167,7 @@ const CompanyRegister = () => {
 
               <InputGroup icon={<Lock size={18}/>} type="password" name="password" value={formData.password} placeholder="Create Password" onChange={handleChange} required />
 
-              <button type="submit" disabled={loading} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 mt-2">
+              <button type="submit" disabled={loading || phoneError !== ""} className="w-full bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 mt-2">
                 {loading ? "Processing..." : "Continue"}
                 <ArrowRight size={18} />
               </button>

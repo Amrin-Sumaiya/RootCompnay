@@ -22,7 +22,7 @@ const AdminArticleCreate = () => {
     setLoading(true);
     try {
       await axios.post(
-        "http://localhost:5000/api/articles",
+        "https://backendjob.chulkani.com/api/articles",
         form,
         {
           headers: {

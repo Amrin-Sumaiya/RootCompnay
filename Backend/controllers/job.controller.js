@@ -1,4 +1,6 @@
 // ================= CREATE JOB =================
+const db = require('../db');
+
 exports.createJob = (req, res) => {
   const {
     JobTitle,

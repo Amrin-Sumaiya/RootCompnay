@@ -8,7 +8,7 @@ const upload = require('../middleware/uploadCompanyLogo')
 
 const { login, getDashboard, sendOTP,
      verifyOTPAndRegister , getCompaniesWithJobs,
-    globalSearch, uploadCompanyLogo, buyPackage, getMyPackage, getAllMyPackages} = require('../controllers/company.controller');
+    globalSearch, uploadCompanyLogo, buyPackage, getMyPackage, getAllMyPackages, locationSearch} = require('../controllers/company.controller');
 
 // Protected route for company dashboard
 router.post('/login', login);
@@ -21,6 +21,7 @@ router.post('/upload-logo', auth, role('company'), upload.single('logo'), upload
 router.post('/buy-package', auth, role('company'), buyPackage);
 router.get('/my-package', auth, role('company'), getMyPackage);
 router.get('/my-packages', auth, role('company'), getAllMyPackages);
+router.get('/location-search', locationSearch);
 
 router.get('/stats', async (req, res) => {
   try {

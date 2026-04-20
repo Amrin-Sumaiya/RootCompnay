@@ -21,7 +21,7 @@ const pageKey = slugMap[location.pathname] || "";
   useEffect(() => {
 
     axios
-      .get(`http://localhost:5000/api/articles/page/${pageKey}`)
+      .get(`https://backendjob.chulkani.com/api/articles/page/${pageKey}`)
       .then((res) => setArticles(res.data))
       .catch((err) => console.log(err));
 

@@ -312,7 +312,7 @@ exports.getDashboard = (req, res) => {
 
       // ✅ FIX 1: convert logo → full URL
       if (company.logo) {
-        company.Logo = `http://localhost:5000/${company.logo}`;
+        company.Logo = `https://backendjob.chulkani.com/${company.logo}`;
       } else {
         company.Logo = null;
       }
@@ -403,6 +403,31 @@ exports.globalSearch = (req, res) => {
       return res.status(500).json([]);
     }
 
+    res.json(results);
+  });
+};
+
+// ================= GLOBAL SEARCH (location ) =================
+exports.locationSearch = (req, res) => {
+  const { location } = req.query;
+
+  if (!location || location.length < 2) {
+    return res.json([]);
+  }
+
+  const term = `%${location}%`;
+
+  const sql = `
+    SELECT DISTINCT City, State, Address
+    FROM jobs
+    WHERE City LIKE ?
+       OR State LIKE ?
+       OR Address LIKE ?
+    LIMIT 10
+  `;
+
+  db.query(sql, [term, term, term], (err, results) => {
+    if (err) return res.status(500).json([]);
     res.json(results);
   });
 };

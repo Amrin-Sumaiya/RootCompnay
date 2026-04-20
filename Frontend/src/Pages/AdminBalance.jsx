@@ -12,7 +12,7 @@ const AdminBalance = () => {
 
   // ✅ Load companies
 useEffect(() => {
-  axios.get("http://localhost:5000/api/admin/companies", {
+  axios.get("https://backendjob.chulkani.com/api/admin/companies", {
     headers: { Authorization: `Bearer ${token}` }
   })
 .then(res => {
@@ -35,7 +35,7 @@ useEffect(() => {
   const handleCompanyChange = async (id) => {
     setCompanyId(id);
 
-    const res = await axios.get(`http://localhost:5000/api/admin/company-balance/${id}`, {
+    const res = await axios.get(`https://backendjob.chulkani.com/api/admin/company-balance/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -46,7 +46,7 @@ useEffect(() => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await axios.post("http://localhost:5000/api/admin/add-balance", {
+    await axios.post("https://backendjob.chulkani.com/api/admin/add-balance", {
       companyId,
       amount,
       paymentMethod: method

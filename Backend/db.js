@@ -1,3 +1,21 @@
+// const mysql = require('mysql');
+
+// const db = mysql.createConnection({
+//   host: 'localhost',
+//   user: 'root',
+//   password: '',
+//   database: 'users'
+// });
+
+// db.connect((err) => {
+//   if (err) {
+//     console.error('Database connection failed:', err);
+//     return;
+//   }
+//   console.log('Connected to MySQL database.');
+// });
+
+// module.exports = db; 
 const mysql = require('mysql');
 
 const db = mysql.createConnection({
@@ -15,4 +33,4 @@ db.connect((err) => {
   console.log('Connected to MySQL database.');
 });
 
-module.exports = db; 
+module.exports = db;

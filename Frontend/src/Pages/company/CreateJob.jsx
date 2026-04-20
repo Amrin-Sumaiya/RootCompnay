@@ -133,16 +133,50 @@ const CreateJob = () => {
     setForm({ ...form, [name]: value });
   };
 
+
+  const validateForm = () => {
+  const requiredFields = [
+    { key: "JobTitle", label: "Job Title" },
+    { key: "JobDescription", label: "Job Description" },
+    { key: "JobType", label: "Job Type" },
+    { key: "Skills", label: "Skills" },
+    { key: "JobLocation", label: "Job Location" },
+    { key: "Country", label: "Country" },
+    { key: "SalaryFrom", label: "Minimum Salary" },
+    { key: "SalaryTo", label: "Maximum Salary" }
+  ];
+
+  for (let field of requiredFields) {
+    if (!form[field.key] || form[field.key].toString().trim() === "") {
+      toast.error(`${field.label} is required`);
+      return false;
+    }
+  }
+
+  // Extra validations
+  if (form.WeeklyVacation.length === 0) {
+    toast.error("Please select at least one weekly vacation day");
+    return false;
+  }
+
+  if (!degree || !department) {
+    toast.error("Please complete qualifications (degree & department)");
+    return false;
+  }
+
+  return true;
+};
+  
+
   const submitJob = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      if (!form.JobTitle || !form.JobDescription || !form.JobType) {
-        toast.error("Please fill all required fields");
-        setLoading(false);
-        return;
-      }
+     if (!validateForm()) {
+  setLoading(false);
+  return;
+} 
 
       let experienceValue = "";
       if (form.experienceFrom === "Fresher") {

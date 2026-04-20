@@ -10,7 +10,7 @@ const About = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/company/public-with-jobs")
+    fetch("https://backendjob.chulkani.com/api/company/public-with-jobs")
       .then((res) => res.json())
       .then((data) => setCompanies(data))
       .catch((err) => console.error(err));
@@ -41,7 +41,7 @@ const About = () => {
               <span className="text-blue-200 text-xs font-bold uppercase tracking-widest">Top Partners</span>
             </div>
             <h3 className="text-4xl md:text-5xl font-bold text-white">
-              Featured <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Companies</span>
+              Featured <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-300">Companies</span>
             </h3>
           </div>
 
@@ -49,23 +49,23 @@ const About = () => {
             {companies.map((company) => (
               <div
                 key={company.CompanyID}
-                className="hover:z-50 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-5 hover:bg-white/15 transition-all duration-300 group flex flex-col relative"
+                className="hover:z-50 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-3 hover:bg-white/15 transition-all duration-300 group flex flex-col relative"
               >
                 {/* 1. Header: Company Name */}
-                <div className="border-b border-white/10 pb-3 mb-4">
+                <div className="border-b border-white/10 pb-2 mb-2">
                   <h4 className="text-lg font-bold text-center text-white truncate leading-tight">
                     {company.CompanyName}
                   </h4>
                 </div>
 
                 {/* 2. Content Body */}
-                <div className="flex gap-4 grow">
+                <div className="flex gap-6 grow">
                   {/* Left Side: Logo */}
                   <div className="shrink-0">
                     <div className="w-20 h-20 rounded-full overflow-hidden bg-white flex items-center justify-center group-hover:scale-105 transition-transform">
                       {company.logo ? (
                         <img
-                          src={`http://localhost:5000${company.logo}`}
+                          src={`https://backendjob.chulkani.com${company.logo}`}
                           alt={company.CompanyName}
                           className="w-full h-full object-cover"
                         />
@@ -115,7 +115,7 @@ const About = () => {
                                   setSelectedCompany(company);
                                   setOpenDropdownId(null);
                               }}
-                              className="w-full text-left flex justify-between items-center text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2 border-b border-white/10 pb-1 hover:text-white transition-colors"
+                     className="w-full text-left flex justify-between items-center text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2 border-b border-white/10 pb-1 hover:text-white transition-colors"
                             >
                               <span>More Jobs</span>
                               <ChevronRight size={10} />
@@ -164,7 +164,7 @@ const About = () => {
               <div className="shrink-0 w-14 h-14 rounded-2xl overflow-hidden bg-white flex items-center justify-center">
                 {selectedCompany?.logo ? (
                   <img
-                    src={`http://localhost:5000${selectedCompany.logo}`}
+                    src={`https://backendjob.chulkani.com${selectedCompany.logo}`}
                     alt={selectedCompany.CompanyName}
                     className="w-full h-full object-cover"
                   />
